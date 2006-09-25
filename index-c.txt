@@ -626,7 +626,7 @@ Wojciech Mu&#322;a, <a href="mailto:wojciech_mula[at]poczta[dot]onet[dot]pl">woj
 </p>
 
 <hr>
-$Id: index.html,v 1.1.1.1 2006-04-03 18:20:33 wojtek Exp $
+$Id: index-c.txt,v 1.1 2006-09-25 15:47:48 wojtek Exp $
 
 </body>
 </html>
