@@ -1,635 +1,550 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-	<meta http-equiv="charset" content="iso-8859-1">
-	<title>aspell-python 1.11</title>
-</head>
-<body style="margin:2em; font-family: Georgia, Times, serif">
+aspell-python 1.11
+==================
 
-<h1 align=center>aspell-python 1.11</h1>
-
-<ol>
-	<li><a href="#what">WHAT IS IT?</a></li>
-	<li><a href="#copyrights">COPYRIGHTS</a></li>
-	<li><a href="#download">DOWNLOAD</a></li>
-	<li><a href="#installation">INSTALLATION</a></li>
-	<li><a href="#usage">USAGE</a></li>
-	<li><a href="#encoding">ENCODING</a></li>
-	<li><a href="#author">AUTHOR</a></li>
-</ol>
-
-<a name="what"></a><h2>1. WHAT IS IT?</h2>
-
-<p>
-<b>aspell-python</b> is a <a href="http://www.python.org">Python</a> wrapper for <a href="http://aspell.net">GNU Aspell</a>.<br>
-
-(Take a look at <a href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/117221">Python Cookbook</a>, Ryan Kelly have collected links to all python bindings for spellers).
-</p>
-
-<p>
-Module has been tested with Python 2.1, Python 2.3.4 and Python 2.4.1. Probably it works fine with all Python versions not older then 2.0.
-</p>
-
-<p>
-<b>News (16.03.2006)</b><br>
-
-<ul>
-	<li>License of module has been changed - now it is <a href="http://www.opensource.org/licenses/bsd-license.php">BSD</a>.</li>
-	<li>Adam Karpierz has compiled module with Microsoft Visual Studio 6. See <a href="#download">Download</a> section.</li>
-</ul>
-</p>
-
-</b>
-
-<p>
-<b>Whats new in version 1.11?</b><br>
-<ul>
-	<li>Fixed ConfigKeys method, now works fine with aspell 0.60, but I do not know and I have not possibility to test if it now works with aspell 0.50. <i>Thanks to Gora Mohanty for mention the bug</i>.<br>
-	    Now ConfigKeys returns key's value of that type which certain field declare. Previously all values were string, now can be boolean (True/False), integer, string and list, so if your program plays with config, you have to modify code a bit.
-	<li>Fixed Speller method.
-	<li><a href="test.py">test.py</a> - simple test script
-</ul>
-</p>
-
-<p>
-All version of aspell I've tested have the same error - calling method <a href="#getMainwordlist">getMainwordlist</a> produces SIGKILL. It is aspell problem and if you really need a full list of words, use external program <tt>word-list-compress</tt>.
-</p>
-
-<table border="1" align="center" cellpadding="4">
-<tr>
-	<td>method
-	<td>aspell 0.50.5
-	<td>aspell 0.60.2
-	<td>aspell 0.60.3
-
-<tr>
-	<td><a href="#ConfigKeys">ConfigKeys</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#Speller">Speller</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#check">check</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#suggest">suggest</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#addReplecement">addReplecement</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#addtoPersonal">addtoPersonal</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#saveAllwords">saveAllwords</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#addtoSession">addtoSession</a>
-	<td>ok
-	<td>ok
-	<td>ok
-
-<tr>
-	<td><a href="#clearSession">clearSession</a>
-	<td>ok
-	<td><a href="#AspellSpellerError"><font color="red">error</font></a>
-	<td>ok
-
-<tr>
-	<td><a href="#getPersonalwordlist">getPersonalwordlist</a>
-	<td>ok
-	<td><font color="red">SIGKILL</font>
-	<td>ok
-
-<tr>
-	<td><a href="#getSessionwordlist">getSessionwordlist</a>
-	<td>ok
-	<td><font color="red">SIGKILL</font>
-	<td>ok
-
-<tr>
-	<td><a href="#getMainwordlist">getMainwordlist</a>
-	<td><font color="red">SIGKILL</font>
-	<td><font color="red">SIGKILL</font>
-	<td><font color="red">SIGKILL</font>
-</table>
+.. contents::
 
 
-<a name="download"></a><h2>2. DOWNLOAD</h2>
+WHAT IS IT?
+-----------
 
-<ul>
-	<li><a href="aspell-python1.11.tar.gz">aspell-python1.11.tar.gz</a> &mdash; <b>latest version</b>, described in this document</li>
-	<li><a href="aspell-python-1.0.win32-py2.4.exe">aspell-python-1.0.win32-py2.4.exe</a>, <a href="aspell-python-1.11.win32-py2.4.exe">aspell-python-1.11.win32-py2.4.exe</a> - precompiled binary files for Microsoft Windows</li>
-	<li><a href="aspell-python1.1.tar.gz">aspell-python1.1.tar.gz</a>
-	<li><a href="aspell-python1.0.tar.gz">aspell-python1.0.tar.gz</a>
-	<li><a href="aspell-python2.1.tar.gz">aspell-python2.1.tar.gz</a> &mdash; obsolete (2.1 is a Python's version, not module); If it is possible don't use it.
-</ul>
+**aspell-python** is a Python_ wrapper for `GNU Aspell`_.
 
-<a name="copyrights"></a><h2>3. COPYRIGHTS</h2>
+.. _Python: http://www.python.org
+.. _GNU Aspell: http://aspell.net
 
-<p>
-Module is covered by <strike>GNU General Public License</strike> <a href="http://www.opensource.org/licenses/bsd-license.php">BSD</a>. <a href="#author">Author</a> tried to make
-code usable and free of errors, but can't give any guarantees and is not responsible for any damages in your software, hardware or anything else.
-</p>
+Take a look at `Python Cookbook`__ --- Ryan Kelly have collected links to all
+python bindings for spellers.
 
-<a name="installation"></a><h2>3. INSTALLATION</h2>
+__ http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/117221
 
-<p>
-First extract the sources:
-</p>
+Module has been tested with Python 2.1, Python 2.3.4 and Python 2.4.1. Probably
+it works fine with all Python versions not older then 2.0.
 
-<pre>
-$ tar -xzf aspell-python[some-number].tar.gz
-$ cd aspell-python
-</pre>
+News (16.03.2006)
+-----------------
 
-<p>
-You need to have libaspell headers installed, <a href="http://packages.debian.org">Debian package</a> is called libaspell-dev, other
-distributions should have similar package.
-</p>
+* License of module has been changed - now it is BSD_.
+* **Adam Karpierz** has compiled module with Microsoft Visual Studio 6. See
+  Download_ section.
 
-<p>
-In order to install aspell-python for all users, you must be a root.
-If you are, type following command:
-</p>
+.. _BSD: http://www.opensource.org/licenses/bsd-license.php
 
-<pre>
-$ python setup.py install
-</pre>
+Whats new in version 1.11?
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<p>
-It builds package and installs aspell.so in <tt>/usr/lib/{python}/site-packages</tt>.
-</p>
+* Fixed ConfigKeys_ method, now works fine with aspell 0.60, but I do not
+  know and I have not possibility to test if it now works with aspell 0.50.
+  **Thanks to Gora Mohanty for mention the bug**.    Now ConfigKeys
+  returns key's value of that type which certain field declare.
+  Previously all values were string, now can be ``boolean``
+  (True/False), ``integer``, ``string`` and ``list``, so if your program
+  plays with config, you have to modify code a bit.
+* Fixed Speller method.
+* `test.py`__ --- simple test script
 
-<p>
+__ test.py
+
+
+
+
+Download
+------------------------------------------------------------------------
+
+* `aspell-python1.11.tar.gz`_ --- **latest version**, described in this document
+* `aspell-python-1.0.win32-py2.4.exe`_, `aspell-python-1.11.win32-py2.4.exe`_
+  --- precompiled binary files for Microsoft Windows>
+* aspell-python1.1.tar.gz
+* aspell-python1.0.tar.gz
+
+.. 
+	* aspell-python2.1.tar.gz --- *obsolete* (2.1 is a Python's version, not module); If it is possible don't use it.
+
+.. _aspell-python1.11.tar.gz: 		aspell-python1.11.tar.gz
+.. _aspell-python-1.0.win32-py2.4.exe:	aspell-python-1.0.win32-py2.4.exe
+.. _aspell-python-1.11.win32-py2.4.exe:	aspell-python-1.11.win32-py2.4.exe
+.. _aspell-python1.1.tar.gz:		aspell-python1.1.tar.gz
+.. _aspell-python1.0.tar.gz:		aspell-python1.0.tar.gz
+
+
+Copyrights
+------------------------------------------------------------------------
+
+Module is covered by BSD_ license.  Author tried to make code usable
+and free of errors, but can't give any guarantees and is not responsible
+for any damages in your software, hardware or anything else.
+
+Wojciech Mu³a, ``wojciech_mula[at]poczta[dot]onet[dot]pl`` (please
+replace ``[at]`` with ``@`` and ``[dot]`` with ``.``)
+
+
+Installation
+------------------------------------------------------------------------
+
+First extract the sources::
+
+	$ tar -xzf aspell-python[some-number].tar.gz
+	$ cd aspell-python
+
+You need to have libaspell headers installed, Debian package is called
+``libaspell-dev``, other distributions should have similar package.
+
+In order to install **aspell-python** for all users, you must be a root.
+If you are, type following command::
+
+	$ python setup.py install
+
+It builds package and installs ``aspell.so`` in directory
+``/usr/lib/{python}/site-packages``.
+
 If you don't have root login, you can build package locally.
-Type following command:
-</p>
+Type following command::
 
-<pre>
-$ python setup.py build
-</pre>
+	$ python setup.py build
 
-<p>
-It builds package and places aspell.so in <tt>build/lib.{something}</tt>.
+It builds package and places aspell.so in ``build/lib.{something}``.
 Change to this directory and when you will run python it will be able to
-import module (you may also copy aspell.so wherever you want, and
-there run python).
-</p>
+import module (you may also copy aspell.so wherever you want, and there
+run python).
 
-<a name="usage"></a><h2>5. USAGE</h2>
+Documentation
+------------------------------------------------------------------------
 
-<p>
-Aspell-python module is seen in python under name <tt>aspell</tt>. So, aspell-python module is imported in following way.
-</p>
+**Aspell-python** module is seen in python under name ``aspell``. So,
+**aspell-python** module is imported in following way::
 
-<pre>
-import aspell
-</pre>
+	import aspell
 
-<p>
-The module provides <a href="#AspellSpeller">AspellSpeller object</a>, two <a href="#methods">methods</a>, and three types of <a href="#Exceptions">exceptions</a> &mdash; all described below.
-</p>
+The module provides AspellSpeller_ object, two methods, and three types
+of exceptions --- all described below.
 
 
+Methods
+~~~~~~~
 
-<a name="methods"></a>
-<h3>5.1. Methods</h3>
+* ConfigKeys
+* Speller
 
-<ul>
-	<li><a href="#ConfigKeys">ConfigKeys</a></li>
-	<li><a href="#Speller">Speller</a></li>
-</ul>
+ConfigKeys()
+^^^^^^^^^^^^
 
-<a name="ConfigKeys"></a>
-<h4>ConfigKeys()</h4>
-
-<p>
 Method returns a list of available configuration keys.
 Items on the list are 4-tuples:
-</p>
 
-<ol>
-	<li>key name</li>
-	<li>key type:
-	<ul>
-		<li>string</li>
-		<li>integer</li>
-		<li>boolean - string <tt>true</tt> or <tt>false</tt></li>
-		<li>list (string, where items are separated by colons)</li>
-	</ul></li>
-	<li>default value for the key</li>
-	<li>short description - <tt>internal</tt> means that aspell
-		doesn't provide any description of item and you shouldn't
-		set/change it, unless you know what you do</li>
-</ol>
+* key name
+* key type:
+	* string
+	* integer
+	* boolean - string ``true`` or ``false``
+	* list (string, where items are separated by colons)
+* default value for the key
+* short description - "internal" means that aspell doesn't provide
+  any description of item and you shouldn't set/change it, unless
+  you know what you do
 
-<p>
+
 Aspell's documentation covers in details all of keys and their meaning.
-Belows is a list of most useful and obvious options
-(it is a filtered output of ConfigKeys).
-</p>
+Below is a list of most useful and obvious options (it is a filtered
+output of ConfigKeys).
 
-<pre>
-('data-dir', 'string', '/usr/lib/aspell-0.60', 'location of language data files')
-('dict-dir', 'string', '/usr/lib/aspell-0.60', 'location of the main word list')
-('encoding', 'string', 'ISO-8859-2', 'encoding to expect data to be in')
-('home-dir', 'string', '/home/wojtek', 'location for personal files')
-('ignore', 'integer', 1, 'ignore words &lt;= n chars')
-('ignore-accents', 'boolean', False, 'ignore accents when checking words -- CURRENTLY IGNORED')
-('ignore-case', 'boolean', False, 'ignore case when checking words')
-('ignore-repl', 'boolean', False, 'ignore commands to store replacement pairs')
-('keyboard', 'string', 'standard', 'keyboard definition to use for typo analysis')
-('lang', 'string', 'pl_PL', 'language code')
-('master', 'string', 'pl_PL', 'base name of the main dictionary to use')
-('personal-path', 'string', '/home/wojtek/.aspell.pl_PL.pws', 'internal')
-('repl-path', 'string', '/home/wojtek/.aspell.pl_PL.prepl', 'internal')
-('run-together', 'boolean', False, 'consider run-together words legal')
-('save-repl', 'boolean', True, 'save replacement pairs on save all')
-('warn', 'boolean', True, 'enable warnings')
-('backup', 'boolean', True, 'create a backup file by appending ".bak"')
-('reverse', 'boolean', False, 'reverse the order of the suggest list')
-('suggest', 'boolean', True, 'suggest possible replacements')
-</pre>
+::
 
-<a name="Speller"></a>
-<h4>Speller()</h4>
+	('data-dir', 'string', '/usr/lib/aspell-0.60', 'location of language data files')
+	('dict-dir', 'string', '/usr/lib/aspell-0.60', 'location of the main word list')
+	('encoding', 'string', 'ISO-8859-2', 'encoding to expect data to be in')
+	('home-dir', 'string', '/home/wojtek', 'location for personal files')
+	('ignore', 'integer', 1, 'ignore words <= n chars')
+	('ignore-accents', 'boolean', False, 'ignore accents when checking words -- CURRENTLY IGNORED')
+	('ignore-case', 'boolean', False, 'ignore case when checking words')
+	('ignore-repl', 'boolean', False, 'ignore commands to store replacement pairs')
+	('keyboard', 'string', 'standard', 'keyboard definition to use for typo analysis')
+	('lang', 'string', 'pl_PL', 'language code')
+	('master', 'string', 'pl_PL', 'base name of the main dictionary to use')
+	('personal-path', 'string', '/home/wojtek/.aspell.pl_PL.pws', 'internal')
+	('repl-path', 'string', '/home/wojtek/.aspell.pl_PL.prepl', 'internal')
+	('run-together', 'boolean', False, 'consider run-together words legal')
+	('save-repl', 'boolean', True, 'save replacement pairs on save all')
+	('warn', 'boolean', True, 'enable warnings')
+	('backup', 'boolean', True, 'create a backup file by appending ".bak"')
+	('reverse', 'boolean', False, 'reverse the order of the suggest list')
+	('suggest', 'boolean', True, 'suggest possible replacements')
 
-<p>
-Method creates an <a href="#AspellSpeller">AspellSpeller object</a>
-which is an interface to the GNU Aspell.
-</p>
 
-<p>
+_`Speller`\ ()
+^^^^^^^^^^^^^^
+
+Method creates an AspellSpeller_ object which is an interface to the GNU
+Aspell.
+
 Speller called with no parameters creates speller using default
-configuration. If you want to change or set some parameter you can
-pass pair of strings: key and it's value. One can get available
-keys using <a href="#ConfigKeys">ConfigKeys()</a>.
-</p>
+configuration. If you want to change or set some parameter you can pass
+pair of strings: key and it's value. One can get available keys using
+ConfigKeys_.
 
-<pre>
-&gt;&gt;&gt; aspell.Speller("key", "value")
-</pre>
+>>> aspell.Speller("key", "value")
 
-<p>
-If you want to set more than one pair of key&amp;value, pass the list
+If you want to set more than one pair of key&value, pass the list
 of pairs to the Speller().
-</p>
 
-<pre>
-&gt;&gt;&gt; aspell.Speller( ("k1","v1"), ("k2","v2"), ("k3","v3") )
-</pre>
+>>> aspell.Speller( ("k1","v1"), ("k2","v2"), ("k3","v3") )
 
-<a name="Exceptions"></a>
-<h3>5.2. Exceptions</h3>
 
-<p>
+Exceptions
+~~~~~~~~~~
+
 Module defines following errors:
-	<a href="#AspellConfigError">AspellConfigError</a>,
-	<a href="#AspellModuleError">AspellModuleError</a> and
-	<a href="#AspellSpellerError">AspellSpellerError</a>.
 
-Additionally TypeError is raised when you pass wrong parameters to method.
-</p>
+* AspellConfigError_,
+* AspellModuleError_ and
+* AspellSpellerError_.
 
-<a name="AspellConfigError"></a>
-<h4>AspellConfigError</h4>
+Additionally TypeError is raised when you pass wrong parameters to
+method.
 
-<p>
-Error is reported by methods <a href="#Speller">Speller()</a> and <a href="#ConfigKeys">ConfigKeys()</a>. The most common error is passing unknown key.
-</p>
+_`AspellConfigError`
+^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-&gt;&gt;&gt; s = aspell.Speller('python', '2.3')
+Error is reported by methods Speller_ and ConfigKeys_. The most common
+error is passing unknown key.
+
+>>> s = aspell.Speller('python', '2.3')
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 aspell.AspellConfigError: The key "python" is unknown.
-&gt;&gt;&gt;
-</pre>
+>>>
 
-<a name="AspellModuleError"></a>
-<h4>AspellModuleError</h4>
 
-<p>
+_`AspellModuleError`
+^^^^^^^^^^^^^^^^^^^^
+
 Error is reported when module can't allocate aspell structures.
-</p>
 
-<a name="AspellSpellerError"></a>
-<h4>AspellSpellerError</h4>
 
-<p>
-Error is reported by libaspell.
-</p>
+_`AspellSpellerError`
+^^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-&gt;&gt;&gt; <i># we set master dictionary file, the file doesn't exist</i>
-&gt;&gt;&gt; s = Speller('master', '/home/dictionary.rws')
+
+Error is reported by ``libaspell``.
+
+>>> # we set master dictionary file, the file doesn't exist
+>>> s = Speller('master', '/home/dictionary.rws')
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 aspell.AspellSpellerError: The file "/home/dictionary.rws" can not be opened for reading.
-&gt;&gt;&gt;
-</pre>
+>>>
 
-<a name="AspellSpeller"></a>
-<h3>5.3. AspellSpeller Object</h3>
+_`AspellSpeller` Object
+~~~~~~~~~~~~~~~~~~~~~~~
 
-<p>
 The AspellSpeller object provides interface to the aspell. It has
 several methods, described below.
-</p>
 
-<ul>
-	<li><a href="#mConfigKeys">ConfigKeys</a></li>
-	<li><a href="#check">check</a></li>
-	<li><a href="#suggest">suggest</a></li>
-	<li><a href="#addReplecement">addReplecement</a></li>
-	<li><a href="#addtoPersonal">addtoPersonal</a></li>
-	<li><a href="#saveAllwords">saveAllwords</a></li>
-	<li><a href="#addtoSession">addtoSession</a></li>
-	<li><a href="#clearSession">clearSession</a></li>
-	<li><a href="#getPersonalwordlist">getPersonalwordlist</a></li>
-	<li><a href="#getSessionwordlist">getSessionwordlist</a></li>
-	<li><a href="#getMainwordlist">getMainwordlist</a></li>
-</ul>
+* ConfigKeys_
+* check_
+* suggest_
+* addReplecement_
+* addtoPersonal_
+* saveAllwords_
+* addtoSession_
+* clearSession_
+* getPersonalwordlist_
+* getSessionwordlist_
+* getMainwordlist_
 
-<p>
-In examples the assumption is that following code has been executed earlier.
-</p>
+In examples the assumption is that following code has been executed
+earlier:
 
-<pre>
-&gt;&gt;&gt; import aspell
-&gt;&gt;&gt; s = aspell.Speller('lang', 'en')
-&gt;&gt;&gt; s
-&lt;AspellSpeller object at 0x40209050&gt;
-&gt;&gt;&gt;
-</pre>
+>>> import aspell
+>>> s = aspell.Speller('lang', 'en')
+>>> s
+<AspellSpeller object at 0x40209050>
+>>>
 
-<a name="mConfigKeys"></a>
-<h4>ConfigKeys(word) =&gt; list of setting of speller</h4>
 
-<p>
-<b>New in version 1.1.</b><br>
-Method returns a list of the <b>speller's</b> configuration keys.
+_`ConfigKeys`\ (word) => list of settings of speller
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+**New in version 1.1.**
+
+Method returns a list of the **speller's** configuration keys.
 Items on the list are 3-tuples:
-</p>
 
-<ol>
-	<li>key name</li>
-	<li>key type:
-	<ul>
-		<li>string</li>
-		<li>integer</li>
-		<li>boolean</li>
-		<li>list</li>
-	</ul></li>
-	<li>value for the key</li>
-</ol>
+1. key name
+2. key type:
+	* string
+	* integer
+	* boolean
+	* list
+3. value for the key
 
-<a name="check"></a>
-<h4>check(word) =&gt; 0 or 1</h4>
 
-<p>
-Method checks spelling of given <tt>word</tt>. If <tt>word</tt> is present in
-the main or personal (see <a href="#addtoPersonal">addtoPersonal()</a>) or
-session dictionary (see <a href="#addtoSession">addtoSession()</a>) returns 1,
-otherwise 0.
-</p>
+_`check`\ (word) => 0 or 1
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-&gt;&gt;&gt; s.check('word') <i># correct word</i>
+Method checks spelling of given ``word``. If ``word`` is present in
+the main or personal (see addtoPersonal_) or session dictionary
+(see addtoSession_) returns 1, otherwise 0.
+
+>>> s.check('word') # correct word
 1
-&gt;&gt;&gt; s.check('wrod') <i># incorrect</i>
+>>> s.check('wrod') # incorrect
 0
-&gt;&gt;&gt;
-</pre>
+>>>
 
-<a name="suggest"></a>
-<h4>suggest(word) =&gt; list of suggestions</h4>
 
-<p>
-Method returns a list of suggested spellings for given word.
-Even if word is correct, i.e. method <a href="#check">check()</a> returned 1,
-action is performed.
-</p>
+_`suggest` (word) => list of suggestions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-&gt;&gt;&gt; s.suggest('wrod') <i># we made mistake, what aspell suggests?</i>
+Method returns a list of suggested spellings for given word.  Even if
+word is correct, i.e. method check_ returned 1, action is performed.
+
+>>> s.suggest('wrod') # we made mistake, what aspell suggests?
 ['word', 'Rod', 'rod', 'Brod', 'prod', 'trod', 'Wood', 'wood', 'wried']
-&gt;&gt;&gt;
-</pre>
+>>>
 
-<p>
-<b>Warning!</b> <tt>suggest()</tt> in aspell 0.50 is very, very slow. I recommend caching it's results if program calls <tt>suggest</tt> several times with the same argument.</p>
+**Warning!** ``suggest()`` in aspell 0.50 is very, very slow. I
+recommend caching it's results if program calls the function several
+times with the same argument.
 
-<a name="#addReplecement"></a>
-<h4>addReplecement(incorrect, correct) =&gt; None</h4>
 
-<p>
-Adds a replacement pair, it affects order of words 
-in <a href="#suggest">suggest()</a> result.
-</p>
+_`addReplecement`\ (incorrect, correct) => None
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-&gt;&gt;&gt; <i># we choose 7th word from previous result</i>
-&gt;&gt;&gt; s.addReplecement('wrod', 'trod')
+Adds a replacement pair, it affects order of words in suggest_ result.
 
-&gt;&gt;&gt; <i># and the selected word appears at the 1st position</i>
-&gt;&gt;&gt; s.suggest('word')
+>>> # we choose 7th word from previous result
+>>> s.addReplecement('wrod', 'trod')
+
+>>> # and the selected word appears at the 1st position
+>>> s.suggest('word')
 ['trod', 'word', 'Rod', 'rod', 'Brod', 'prod', 'Wood', 'wood', 'wried']
-</pre>
 
-<p>
-If config key <tt>save-repl</tt> is <tt>true</tt> method <a href="#saveAllwords">saveAllwords()</a> saves
-the replacement pairs to file <tt>~/.aspell.{lang_code}.prepl</tt>.
-</p>
+If config key ``save-repl`` is ``true`` method saveAllwords_ saves
+the replacement pairs to file ``~/.aspell.{lang_code}.prepl``.
 
-<a name="addtoPersonal"></a>
-<h4>addtoPersonal(word) =&gt; None</h4>
 
-<p>
-Adds word to the personal dictionary, which is stored in file <tt>~./.aspell.{lang_code}.pws</tt>. The added words are available for AspellSpeller object, but they remain unsaved until method <a href="#saveAllwords">saveAllwords()</a> is called.
-</p>
+_`addtoPersonal`\ (word) => None
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<pre>
-<i># personal dictionary is empty now</i>
-$ cat ~/.aspell.en.pws
-personal_ws-1.1 en 0
+Adds word to the personal dictionary, which is stored in file
+``~./.aspell.{lang_code}.pws``. The added words are available for
+AspellSpeller object, but they remain unsaved until method saveAllwords_
+is called.
 
-$ python
-&gt;&gt;&gt; import aspell
-&gt;&gt;&gt; s = aspell.Speller('lang', 'en')
-<i># word 'aspell' doesn't exist</i>
-&gt;&gt;&gt; s.check('aspell')
-0
+::
 
-<i># we add it to the personal dictionary</i>
-&gt;&gt;&gt; s.addtoPersonal('aspell')
+	# personal dictionary is empty now
+	$ cat ~/.aspell.en.pws
+	personal_ws-1.1 en 0
 
-<i># and now aspell knows it</i>
-&gt;&gt;&gt; s.check('aspell')
-1
+	$ python
+	>>> import aspell
+	>>> s = aspell.Speller('lang', 'en')
+	# word 'aspell' doesn't exist
+	>>> s.check('aspell')
+	0
 
-<i># we save personal dictionary</i>
-&gt;&gt;&gt; s.saveAllwords()
+	# we add it to the personal dictionary
+	>>> s.addtoPersonal('aspell')
 
-<i># new word appeared in the file</i>
-$ cat ~/.aspell.en.pws
-personal_ws-1.1 en 1
-aspell
+	# and now aspell knows it
+	>>> s.check('aspell')
+	1
 
-<i># check it once again</i>
-$ python
-&gt;&gt;&gt; import aspell
-&gt;&gt;&gt; s = aspell.Speller('lang', 'en')
+	# we save personal dictionary
+	>>> s.saveAllwords()
 
-<i># aspell still knows it's own name</i>
-&gt;&gt;&gt; s.check('aspell')
-1
+	# new word appeared in the file
+	$ cat ~/.aspell.en.pws
+	personal_ws-1.1 en 1
+	aspell
 
-&gt;&gt;&gt; s.check('aaa')
-0
-&gt;&gt;&gt; s.check('bbb')
-0
-<i># add incorrect words, they shouldn't be saved</i>
-&gt;&gt;&gt; s.addtoPersonal('aaa')
-&gt;&gt;&gt; s.addtoPersonal('bbb')
-&gt;&gt;&gt; s.check('aaa')
-1
-&gt;&gt;&gt; s.check('bbb')
-1
+	# check it once again
+	$ python
+	>>> import aspell
+	>>> s = aspell.Speller('lang', 'en')
 
-<i># we've exit without saving, words 'aaa' and 'bbb' doesn't exists</i>
-$ cat ~/.aspell.en.pws
-personal_ws-1.1 en 1
-aspell
-$
-</pre>
+	# aspell still knows it's own name
+	>>> s.check('aspell')
+	1
 
-<a name="addtoSession"></a>
-<h4>addtoSession(word) =&gt; None</h4>
+	>>> s.check('aaa')
+	0
+	>>> s.check('bbb')
+	0
+	# add incorrect words, they shouldn't be saved
+	>>> s.addtoPersonal('aaa')
+	>>> s.addtoPersonal('bbb')
+	>>> s.check('aaa')
+	1
+	>>> s.check('bbb')
+	1
 
-<p>
+	# we've exit without saving, words 'aaa' and 'bbb' doesn't exists
+	$ cat ~/.aspell.en.pws
+	personal_ws-1.1 en 1
+	aspell
+	$
+
+
+_`addtoSession`\ (word) => None
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Adds word to the session dictionary. The session dictionary is
 volatile, it is not saved to any file. It is destroyed with
-<a href="#AspellSpeller ">AspellSpeller</a> object or when method <a href="#clearSession">clearSession()</a> is called.
-</p>
+AspellSpeller_ object or when method clearSession_ is called.
 
-<a name="clearSession"></a>
-<h4>clearSession() =&gt; None</h4>
 
-<p>
+_`saveAllwords`\ () => None
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Save all words from personal dictionary.
+
+
+_`clearSession`\ () => None
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Clears session dictionary.
-</p>
 
-<pre>
-&gt;&gt;&gt; import aspell
-&gt;&gt;&gt; s = aspell.Speller('lang', 'en')
-&gt;&gt;&gt; s.check('linux')
+>>> import aspell
+>>> s = aspell.Speller('lang', 'en')
+>>> s.check('linux')
 0
-&gt;&gt;&gt; s.addtoSession('linux')
-&gt;&gt;&gt; s.check('linux')
+>>> s.addtoSession('linux')
+>>> s.check('linux')
 1
-&gt;&gt;&gt; s.clearSession()
-&gt;&gt;&gt; s.check('linux')
+>>> s.clearSession()
+>>> s.check('linux')
 0
-</pre>
 
-<a name="getPersonalwordlist"></a>
-<h4>getPersonalwordlist() =&gt; [list of strings]</h4>
+_`getPersonalwordlist`\ () => [list of strings]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<p>
 Returns list of words from personal dictionary.
-</p>
 
-<a name="getSessionwordlist"></a>
-<h4>getSessionwordlist() =&gt; [list of strings]</h4>
+_`getSessionwordlist`\ () => [list of strings]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<p>
 Returns list of words from session dictionary.
-</p>
 
-<pre>
-&gt;&gt;&gt; s.addtoSession('aaa')
-&gt;&gt;&gt; s.addtoSession('bbb')
-&gt;&gt;&gt; s.getSessionwordlist()
+>>> s.addtoSession('aaa')
+>>> s.addtoSession('bbb')
+>>> s.getSessionwordlist()
 ['aaa', 'bbb']
-&gt;&gt;&gt; s.clearSession()
-&gt;&gt;&gt; s.getSessionwordlist()
+>>> s.clearSession()
+>>> s.getSessionwordlist()
 []
-&gt;&gt;&gt;
-</pre>
+>>>
 
-<a name="getMainwordlist"></a>
-<h4>getMainwordlist() =&gt; [list of strings]</h4>
 
-<p>
+_`getMainwordlist`\ () => [list of strings]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Returns list of words from the main dictionary.
-</p>
 
-<a name="encoding"></a><h2>6. ENCODING</h2>
 
-<p>
+Known problems
+~~~~~~~~~~~~~~
+
+All version of aspell I've tested have the same error - calling method
+getMainwordlist_ produces ``SIGKILL``. It is aspell problem and if you
+really need a full list of words, use external program
+``word-list-compress``.
+
+
+.. list-table::
+
+	* - method
+	  - aspell 0.50.5
+	  - aspell 0.60.2
+	  - aspell 0.60.3
+
+	* - ConfigKeys_
+	  - ok
+	  - ok
+	  - ok
+
+	* - Speller_
+	  - ok
+	  - ok
+	  - ok
+
+	* - check_
+	  - ok
+	  - ok
+	  - ok
+
+	* - suggest_
+	  - ok
+	  - ok
+	  - ok
+
+	* - addReplecement_
+	  - ok
+	  - ok
+	  - ok
+
+	* - addtoPersonal_
+	  - ok
+	  - ok
+	  - ok
+
+	* - saveAllwords_
+	  - ok
+	  - ok
+	  - ok
+
+	* - addtoSession_
+	  - ok
+	  - ok
+	  - ok
+
+	* - clearSession_
+	  - ok
+	  - AspellSpellerError_
+	  - ok
+
+	* - getPersonalwordlist_
+	  - ok
+	  - **SIGKILL**
+	  - ok
+
+	* - getSessionwordlist_
+	  - ok
+	  - **SIGKILL**
+	  - ok
+
+	* - getMainwordlist_
+	  - **SIGKILL**
+	  - **SIGKILL**
+	  - **SIGKILL**
+
+Character encoding
+------------------
+
 Aspell uses 8-bit encoding. The encoding depend on dictionary setting and 
-is stored in key <tt>encoding</tt>. One can obtain this key using speller's
-method <a href="#mConfigKeys">ConfigKeys</a>.
-</p>
+is stored in key ``encoding``. One can obtain this key using speller's
+ConfigKeys_.
 
-<p>
 If your application uses other encoding then aspell, the translation is
 needed. Here is a sample session (polish dictionary is used).
-</p>
 
-<pre>
-&gt;&gt;&gt; import aspell
-&gt;&gt;&gt; s=aspell.Speller('lang', 'pl')
-&gt;&gt;&gt; 
-&gt;&gt;&gt; [i for i in s.ConfigKeys() if i[0]=='encoding']
+>>> import aspell
+>>> s=aspell.Speller('lang', 'pl')
+>>> 
+>>> [i for i in s.ConfigKeys() if i[0]=='encoding']
 [('encoding', 'string', 'iso8859-2')]
-&gt;&gt;&gt; enc = [i for i in s.ConfigKeys() if i[0]=='encoding'][0][2]
-&gt;&gt;&gt; enc  <i># dictionary encoding</i>
+>>> enc = [i for i in s.ConfigKeys() if i[0]=='encoding'][0][2]
+>>> enc  # dictionary encoding
 'iso8859-2'
-&gt;&gt;&gt; word <i># encoding of word is utf8</i>
-<i># 'g¿eg¿ó³ka' means in some polish dialects 'cuckoo'</i>
+>>> word # encoding of word is utf8
+# 'g¿eg¿ó³ka' means in some polish dialects 'cuckoo'
 'g\xc5\xbceg\xc5\xbc\xc3\xb3\xc5\x82ka'
-&gt;&gt;&gt; s.check(word)
+>>> s.check(word)
 0
-&gt;&gt;&gt; s.check( unicode(word, 'utf-8').encode(enc) )
+>>> s.check( unicode(word, 'utf-8').encode(enc) )
 1
-</pre>
 
-<a name="author"></a><h2>7. AUTHOR</h2>
 
-<p>
-Wojciech Mu&#322;a, <a href="mailto:wojciech_mula[at]poczta[dot]onet[dot]pl">wojciech_mula[at]poczta[dot]onet[dot]pl</a> (please replace <tt>[at]</tt> with <tt>@</tt> and <tt>[dot]</tt> with <tt>.</tt>)
-</p>
-
-<hr>
-$Id: index-c.txt,v 1.1 2006-09-25 15:47:48 wojtek Exp $
-
-</body>
-</html>
-<!--
-vim ts=8
--->
+..
+	vim: tw=72 ts=4 sw=4
