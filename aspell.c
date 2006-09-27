@@ -7,7 +7,7 @@
         * aspell 0.50.5 & python 2.3.4, 3.4.1
         * aspell 0.60.2 & python 2.3.4
 
-        Released under GNU GPL license
+        Released under BSD license
 
         Wojciech Mu³a
         wojciech_mula@poczta.onet.pl
@@ -36,9 +36,11 @@
               * fixed method ConfigKeys - now works with aspell 0.60
 							  thanks to Gora Mohanty for note
 						  * fixed stupid bug in Speller
+ #       04.2006:
+              * license is BSD now
 
 
-$Id: aspell.c,v 1.1.1.1 2006-04-03 18:20:33 wojtek Exp $
+$Id: aspell.c,v 1.2 2006-09-27 16:45:16 wojtek Exp $
 ******************************************************************************/
 
 #include <Python.h>
