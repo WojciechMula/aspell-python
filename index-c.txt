@@ -53,17 +53,17 @@ Download
 * `aspell-python1.11.tar.gz`_ --- **latest version**, described in this document
 * `aspell-python-1.0.win32-py2.4.exe`_, `aspell-python-1.11.win32-py2.4.exe`_
   --- precompiled binary files for Microsoft Windows>
-* aspell-python1.1.tar.gz
-* aspell-python1.0.tar.gz
+* `aspell-python1.1.tar.gz`_
+* `aspell-python1.0.tar.gz`_
 
 .. 
 	* aspell-python2.1.tar.gz --- *obsolete* (2.1 is a Python's version, not module); If it is possible don't use it.
 
-.. _aspell-python1.11.tar.gz: 		aspell-python1.11.tar.gz
-.. _aspell-python-1.0.win32-py2.4.exe:	aspell-python-1.0.win32-py2.4.exe
-.. _aspell-python-1.11.win32-py2.4.exe:	aspell-python-1.11.win32-py2.4.exe
-.. _aspell-python1.1.tar.gz:		aspell-python1.1.tar.gz
-.. _aspell-python1.0.tar.gz:		aspell-python1.0.tar.gz
+.. _aspell-python1.11.tar.gz: 			download/aspell-python1.11.tar.gz
+.. _aspell-python-1.0.win32-py2.4.exe:	download/aspell-python-1.0.win32-py2.4.exe
+.. _aspell-python-1.11.win32-py2.4.exe:	download/aspell-python-1.11.win32-py2.4.exe
+.. _aspell-python1.1.tar.gz: download/aspell-python1.1.tar.gz
+.. _aspell-python1.0.tar.gz: download/aspell-python1.0.tar.gz
 
 
 Copyrights
