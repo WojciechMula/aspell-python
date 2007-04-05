@@ -1,3 +1,18 @@
+# -*- coding: iso-8859-2 -*-
+# Aspell interface using ctypes.
+# $Date: 2007-04-05 12:24:07 $, $Revision: 1.2 $
+#
+# This is straightforward translation of my
+# aspell-python, C extension.
+#
+# License: BSD
+#
+# author: Wojciech Mu³a
+# e-mail: wojciech_mula@poczta.onet.pl
+# www   : http://wmula.republika.pl/proj/aspell-python/
+#
+# TODO: add method to get/change **current** speller's config
+
 try:
 	import ctypes
 	import ctypes.util
@@ -11,7 +26,23 @@ class AspellSpellerError(AspellError): pass
 
 
 class AspellLinux(object):
+	"""
+	Aspell speller object.  Allows to check spelling, get suggested
+	spelling list, manage user dictionarias, and other.
+	
+	Must be closed with 'close' method, or one may experience
+	problems, like segfaults.
+	"""
+
 	def __init__(self, configkeys=None, libname=None):
+		"""
+		Parameters:
+		* configkeys - list of configuration parameters;
+		  each element is a pair key & value (both strings)
+		  if None, then default configuration is used
+		* libname - explicity set aspell library name;
+		  if None then default name is used
+		"""
 		if libname is None:
 			libname = ctypes.util.find_library('aspell')
 		self.__lib = ctypes.CDLL(libname)
@@ -49,6 +80,10 @@ class AspellLinux(object):
 
 
 	def check(self, word):
+		"""
+		Check if word is present in main, personal or session
+		dictionary.  Boolean value is returned
+		"""
 		if type(word) is str:
 			return bool(
 				self.__lib.aspell_speller_check(
@@ -61,6 +96,10 @@ class AspellLinux(object):
 
 
 	def suggest(self, word):
+		"""
+		Return list of spelling suggestions of given word.
+		Works even if word is correct.
+		"""
 		if type(word) is str:
 			return self._aspellwordlist(
 				self.__lib.aspell_speller_suggest(
@@ -73,6 +112,14 @@ class AspellLinux(object):
 
 
 	def personal_dict(self, word=None):
+		"""
+		Aspell's personal dictionary is a user defined, persistent
+		list of word (saved in certain file).
+
+		If 'word' is not given, then method returns list of words stored in
+		dict.  If 'word' is given, then is added to personal dict.  New words
+		are not saved automatically, method 'save_all' have to be call.
+		"""
 		if word is not None:
 			# add new word
 			assert type(word) is str, "String expeced"
@@ -90,9 +137,18 @@ class AspellLinux(object):
 	
 
 	def session_dict(self, word=None, clear=False):
+		"""
+		Aspell's session dictionary is a user defined, volatile
+		list of word, that is destroyed with aspell object.
+
+		If 'word' is None, then list of words from session dictionary
+		is returned.  If 'word' is present, then is added to dict.
+		If 'clear' is True, then session dictionary is cleared.
+		"""
 		if clear:
 			self.__lib.aspell_speller_clear_session(self.__speller)
 			self._aspell_check_error()
+			return
 
 
 		if word is not None:
@@ -112,6 +168,11 @@ class AspellLinux(object):
 	
 
 	def add_replacement_pair(self, misspelled, correct):
+		"""
+		Add replacement pair, i.e. pair of misspelled and correct
+		word.  It affects on order of words appear on list returned
+		by 'suggest' method.
+		"""
 		assert type(misspelled) is str, "String is required"
 		assert type(correct) is str, "String is required"
 
@@ -126,11 +187,30 @@ class AspellLinux(object):
 	
 
 	def save_all(self):
+		"""
+		Saves all words added to personal or session dictionary to
+		the apell's defined file.
+		"""
 		self.__lib.spell_speller_save_all_word_lists(self.__speller)
 		self._aspell_check_error()
 	
 
 	def configkeys(self):
+		"""
+		Returns list of all available config keys that can be passed
+		to contructor.
+		
+		List contains a 3-tuples:
+		1. key name
+		2. default value of type:
+		   * bool
+		   * int
+		   * string
+		   * list of string
+		3. short description
+		   if None, then this key is undocumented is should not
+		   be used, unless one know what really do
+		"""
 		
 		config = self.__lib.aspell_speller_config(self.__speller)
 		if config is None:
@@ -203,10 +283,19 @@ class AspellLinux(object):
 
 
 	def close(self):
+		"""
+		Close aspell speller object.
+		"""
 		self.__lib.delete_aspell_speller(self.__speller)
 	
 
+	# XXX: internal function, do not call directly
 	def _aspellwordlist(self, wordlist_id):
+		"""
+		XXX: internal function
+
+		Converts aspell list into python list.
+		"""
 		elements = self.__lib.aspell_word_list_elements(wordlist_id)
 		list = []
 		while True:
@@ -222,6 +311,12 @@ class AspellLinux(object):
 	
 
 	def _aspell_config_error(self, config):
+		"""
+		XXX: internal function
+
+		Raise excpetion if operation of speller config
+		caused an error.  Additionaly destroy config object.
+		"""
 		# make exception object & copy error msg 
 		exc = AspellConfigError(
 			ctypes.c_char_p(
@@ -237,13 +332,36 @@ class AspellLinux(object):
 
 
 	def _aspell_check_error(self):
+		"""
+		XXX: internal function
+
+		Raise exception if previous speller operation
+		caused an error.
+		"""
 		if self.__lib.aspell_speller_error(self.__speller) != 0:
 			msg = self.__lib.aspell_speller_error_message(self.__speller)
 			raise AspellSpellerError(msg)
-		
-	
+#class
+
+Aspell = AspellLinux
+
+
 if __name__ == '__main__':
-	a = AspellLinux(("lang", "en"))
+	# TODO: more test cases
+	a = Aspell(("lang", "en"))
+	print a.check("when")
+	print a.suggest("wehn")
+	a.add_replacement_pair("wehn", "ween")
+	print a.suggest("wehn")
+
+	print a.session_dict()
+	print a.check("pyaspell")
+	a.session_dict("pyaspell")
+	print a.session_dict()
+	print a.check("pyaspell")
+	a.session_dict(clear=True)
+	print a.session_dict()
+	
 	a.close()
 
 # vim: ts=4 sw=4
