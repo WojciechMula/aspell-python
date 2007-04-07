@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-2 -*-
 # Aspell interface using ctypes.
-# $Date: 2007-04-05 12:24:07 $, $Revision: 1.2 $
+# $Date: 2007-04-07 14:27:33 $, $Revision: 1.3 $
 #
 # This is straightforward translation of my
 # aspell-python, C extension.
@@ -241,7 +241,7 @@ class AspellLinux(object):
 			else:
 				key_info = key_info.contents
 
-			if key_info.type == 10:
+			if key_info.type == 0:
 				# string
 				list.append((
 					key_info.name,
@@ -249,14 +249,14 @@ class AspellLinux(object):
 					key_info.desc,
 				))
 
-			elif key_info.type == 11:
+			elif key_info.type == 1:
 				# integer
 				list.append((
 					key_info.name,
 					int(key_info.default),
 					key_info.desc,
 				))
-			elif key_info.type == 12:
+			elif key_info.type == 2:
 				# boolean
 				if key_info.default.lower() == 'true':
 					list.append((
