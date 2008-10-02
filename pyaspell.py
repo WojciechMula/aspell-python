@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-2 -*-
 # Aspell interface using ctypes.
-# $Date: 2008-10-02 19:40:04 $, $Revision: 1.4 $
+# $Date: 2008-10-02 21:29:05 $, $Revision: 1.5 $
 #
 # This is straightforward translation of my
 # aspell-python, C extension.
@@ -12,8 +12,9 @@
 # www   : http://wmula.republika.pl/proj/aspell-python/
 #
 # TODO: add method to get/change **current** speller's config
-# Chanes:
-#	fixed typo in save_all, thanks to Thomas Waldecker (thomas!yospot.de)
+#
+# Changes:
+#	2008-09-xx: fixed typo in save_all, thanks to Thomas Waldecker (thomas!yospot.de)
 
 try:
 	import ctypes
