@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-2 -*-
 # Aspell interface using ctypes.
-# $Date: 2007-04-07 14:27:33 $, $Revision: 1.3 $
+# $Date: 2008-10-02 19:40:04 $, $Revision: 1.4 $
 #
 # This is straightforward translation of my
 # aspell-python, C extension.
@@ -12,6 +12,8 @@
 # www   : http://wmula.republika.pl/proj/aspell-python/
 #
 # TODO: add method to get/change **current** speller's config
+# Chanes:
+#	fixed typo in save_all, thanks to Thomas Waldecker (thomas!yospot.de)
 
 try:
 	import ctypes
@@ -191,7 +193,7 @@ class AspellLinux(object):
 		Saves all words added to personal or session dictionary to
 		the apell's defined file.
 		"""
-		self.__lib.spell_speller_save_all_word_lists(self.__speller)
+		self.__lib.aspell_speller_save_all_word_lists(self.__speller)
 		self._aspell_check_error()
 	
 
