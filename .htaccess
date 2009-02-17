@@ -1,0 +1,5 @@
+AddDescription "Aspell-python module - C extension" aspell.c
+AddDescription "Dump configuration from aspell object" config.py
+AddDescription "Aspell-python module - Python module that uses ctypes" pyaspell.py
+AddDescription "Installation script" setup.py
+AddDescription "Test program" test.py
