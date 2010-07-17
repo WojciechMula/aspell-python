@@ -9,7 +9,7 @@
 #
 # author: Wojciech Mu³a
 # e-mail: wojciech_mula@poczta.onet.pl
-# www   : http://wmula.republika.pl/proj/aspell-python/
+# www   : http://0x80.pl/proj/aspell-python/
 #
 # TODO: add method to get/change **current** speller's config
 #
