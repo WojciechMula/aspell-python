@@ -14,7 +14,13 @@
 # TODO: add method to get/change **current** speller's config
 #
 # Changes:
-#	2008-09-xx: fixed typo in save_all, thanks to Thomas Waldecker (thomas!yospot.de)
+#	2011-02-20
+#		* python3 compatible
+#		* fixed docs
+#             
+#	2008-09-xx:
+#		* fixed typo in save_all, thanks to Thomas Waldecker (thomas!yospot.de)
+#
 
 try:
 	import ctypes
@@ -27,11 +33,27 @@ class AspellError(Exception): pass
 class AspellConfigError(AspellError): pass
 class AspellSpellerError(AspellError): pass
 
+try:
+	bytes
+
+	def _to_bytes(s):
+		return s.encode()
+
+	def _from_bytes(s):
+		return str(s)
+
+except NameError:
+	def _to_bytes(s):
+		return s
+
+	def _from_bytes(s):
+		return s
+
 
 class AspellLinux(object):
 	"""
 	Aspell speller object.  Allows to check spelling, get suggested
-	spelling list, manage user dictionarias, and other.
+	spelling list, manage user dictionaries, and other.
 	
 	Must be closed with 'close' method, or one may experience
 	problems, like segfaults.
@@ -43,7 +65,7 @@ class AspellLinux(object):
 		* configkeys - list of configuration parameters;
 		  each element is a pair key & value (both strings)
 		  if None, then default configuration is used
-		* libname - explicity set aspell library name;
+		* libname - explicitly set aspell library name;
 		  if None then default name is used
 		"""
 		if libname is None:
@@ -59,16 +81,16 @@ class AspellLinux(object):
 
 		# 2. parse configkeys arg.
 		if configkeys is not None:
-			assert type(configkeys) in [tuple, list], "Tuple or list expeced"
+			assert type(configkeys) in [tuple, list], "Tuple or list expected"
 			if len(configkeys) == 2 and \
 			   type(configkeys[0]) is str and \
 			   type(configkeys[1]) is str:
 				configkeys = [configkeys]
 
 			for key, value in configkeys:
-				assert type(key) is str, "Key must be string"
+				assert type(key)   is str, "Key must be string"
 				assert type(value) is str, "Value must be string"
-				if not self.__lib.aspell_config_replace(config, key, value):
+				if not self.__lib.aspell_config_replace(config, _to_bytes(key), _to_bytes(value)):
 					raise self._aspell_config_error(config)
 
 		# 3. create speller
@@ -91,11 +113,11 @@ class AspellLinux(object):
 			return bool(
 				self.__lib.aspell_speller_check(
 					self.__speller,
-					word,
+					_to_bytes(word),
 					len(word)
 				))
 		else:
-			raise TypeError("String expeced")
+			raise TypeError("String expected")
 
 
 	def suggest(self, word):
@@ -107,11 +129,11 @@ class AspellLinux(object):
 			return self._aspellwordlist(
 				self.__lib.aspell_speller_suggest(
 					self.__speller,
-					word,
+					_to_bytes(word),
 					len(word)
 				))
 		else:
-			raise TypeError("String expeced")
+			raise TypeError("String expected")
 
 
 	def personal_dict(self, word=None):
@@ -125,10 +147,10 @@ class AspellLinux(object):
 		"""
 		if word is not None:
 			# add new word
-			assert type(word) is str, "String expeced"
+			assert type(word) is str, "String expected"
 			self.__lib.aspell_speller_add_to_personal(
 				self.__speller,
-				word,
+				_to_bytes(word),
 				len(word)
 			)
 			self._aspell_check_error()
@@ -156,10 +178,10 @@ class AspellLinux(object):
 
 		if word is not None:
 			# add new word
-			assert type(word) is str, "String expeced"
+			assert type(word) is str, "String expected"
 			self.__lib.aspell_speller_add_to_session(
 				self.__speller,
-				word,
+				_to_bytes(word),
 				len(word)
 			)
 			self._aspell_check_error()
@@ -181,9 +203,9 @@ class AspellLinux(object):
 
 		self.__lib.aspell_speller_store_replacement(
 			self.__speller,
-			misspelled,
+			_to_bytes(misspelled),
 			len(misspelled),
-			correct,
+			_to_bytes(correct),
 			len(correct)
 		)
 		self._aspell_check_error()
@@ -201,7 +223,7 @@ class AspellLinux(object):
 	def configkeys(self):
 		"""
 		Returns list of all available config keys that can be passed
-		to contructor.
+		to constructor.
 		
 		List contains a 3-tuples:
 		1. key name
@@ -247,38 +269,38 @@ class AspellLinux(object):
 			if key_info.type == 0:
 				# string
 				list.append((
-					key_info.name,
-					key_info.default,
-					key_info.desc,
+					_from_bytes(key_info.name),
+					_from_bytes(key_info.default),
+					_from_bytes(key_info.desc),
 				))
 
 			elif key_info.type == 1:
 				# integer
 				list.append((
-					key_info.name,
+					_from_bytes(key_info.name),
 					int(key_info.default),
-					key_info.desc,
+					_from_bytes(key_info.desc),
 				))
 			elif key_info.type == 2:
 				# boolean
-				if key_info.default.lower() == 'true':
+				if _from_bytes(key_info.default.lower()) == 'true':
 					list.append((
-						key_info.name,
+						_from_bytes(key_info.name),
 						True,
-						key_info.desc,
+						_from_bytes(key_info.desc),
 					))
 				else:
 					list.append((
-						key_info.name,
+						_from_bytes(key_info.name),
 						False,
-						key_info.desc,
+						_from_bytes(key_info.desc),
 					))
 			elif key_info.type == 3:
 				# list
 				list.append((
-					key_info.name,
-					key_info.default.split(),
-					key_info.desc,
+					_from_bytes(key_info.name),
+					_from_bytes(key_info.default.split()),
+					_from_bytes(key_info.desc),
 					))
 
 		self.__lib.delete_aspell_key_info_enumeration(keys_enum)
@@ -307,7 +329,7 @@ class AspellLinux(object):
 				break
 			else:
 				word = ctypes.c_char_p(wordptr)
-				list.append(word.value)
+				list.append(_from_bytes(word.value))
 
 		self.__lib.delete_aspell_string_enumeration(elements)
 		return list
@@ -317,14 +339,14 @@ class AspellLinux(object):
 		"""
 		XXX: internal function
 
-		Raise excpetion if operation of speller config
-		caused an error.  Additionaly destroy config object.
+		Raise exception if operation of speller config
+		caused an error.  Additionally destroy config object.
 		"""
 		# make exception object & copy error msg 
 		exc = AspellConfigError(
-			ctypes.c_char_p(
+			_from_bytes(ctypes.c_char_p(
 				self.__lib.aspell_config_error_message(config)
-			).value
+			).value)
 		)
 	
 		# then destroy config objcet
@@ -343,7 +365,7 @@ class AspellLinux(object):
 		"""
 		if self.__lib.aspell_speller_error(self.__speller) != 0:
 			msg = self.__lib.aspell_speller_error_message(self.__speller)
-			raise AspellSpellerError(msg)
+			raise AspellSpellerError(_from_bytes(msg))
 #class
 
 Aspell = AspellLinux
@@ -352,18 +374,21 @@ Aspell = AspellLinux
 if __name__ == '__main__':
 	# TODO: more test cases
 	a = Aspell(("lang", "en"))
-	print a.check("when")
-	print a.suggest("wehn")
+	print(a.check("when"))
+	print(a.suggest("wehn"))
 	a.add_replacement_pair("wehn", "ween")
-	print a.suggest("wehn")
+	print(a.suggest("wehn"))
 
-	print a.session_dict()
-	print a.check("pyaspell")
+	print(a.session_dict())
+	print(a.check("pyaspell"))
 	a.session_dict("pyaspell")
-	print a.session_dict()
-	print a.check("pyaspell")
+	print(a.session_dict())
+	print(a.check("pyaspell"))
 	a.session_dict(clear=True)
-	print a.session_dict()
+	print(a.session_dict())
+
+	for item in a.configkeys():
+		print(item)
 	
 	a.close()
 
