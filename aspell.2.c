@@ -13,34 +13,32 @@
         wojciech_mula@poczta.onet.pl
 
  History:
- - 20-22.08.2004:
+ # 20-22.08.2004:
               * first version of module
- -    28.08.2004:
+ #    28.08.2004:
               * tested with python 2.3.4
               * now aspell.new accepts list of config keys
                 (see typescript2.txt for examples)
- -     7.10.2004:
+ #     7.10.2004:
               * fixed saveAllwords method
                 patch by Helmut Jarausch
 
- -    30.12.2004:
+ #    30.12.2004:
               * new() constructor replaced with Speller()
               * constructor accepts now much simpler syntax for passing
                 multiple arguments
               * removed methods releated to configuratinon from AspellSpeller
                 object
               * global method ConfigKeys()
- -    29.01.2005:
+ #    29.01.2005:
               * added method ConfigKeys()
- -    18.08.2005:
+ #    18.08.2005:
               * fixed method ConfigKeys - now works with aspell 0.60
 							  thanks to Gora Mohanty for note
 						  * fixed stupid bug in Speller
- -       04.2006:
+ #       04.2006:
               * license is BSD now
 
- -    2011-03-11:
-							* compliance with py3k
 
 $Id: aspell.c,v 1.2 2006-09-27 16:45:16 wojtek Exp $
 ******************************************************************************/
@@ -97,8 +95,7 @@ static PyObject* AspellStringList2PythonList(const AspellStringList* wordlist) {
 }
 
 
-static PyTypeObject aspell_AspellType;
-
+staticforward PyTypeObject aspell_AspellType;
 /* error reported by speller */
 static PyObject* _AspellSpellerException;
 
@@ -114,6 +111,10 @@ typedef struct {
 } aspell_AspellObject;
 
 #define Speller(pyobject) (((aspell_AspellObject*)pyobject)->speller)
+
+#define return_None   \
+	Py_INCREF(Py_None); \
+	return Py_None;
 
 /* Create a new speller *******************************************************/
 static PyObject* new_speller(PyObject* self, PyObject* args) {
@@ -205,7 +206,7 @@ static PyObject* configkeys(PyObject* _) {
 	AspellMutableContainer* amc;
 	const AspellKeyInfo *key_info;
 
-	PyObject *key_list = 0, *obj = 0;
+	PyObject *key_list, *obj;
 	const char*  string;
 	unsigned int integer;
 	unsigned int boolean;
@@ -233,13 +234,13 @@ static PyObject* configkeys(PyObject* _) {
 				key_type = "string";
 				string   = aspell_config_retrieve(config, key_info->name);
 				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyUnicode_FromString( string );
+				obj      = PyString_FromString( string );
 				break;
 			case AspellKeyInfoInt:
 				key_type = "integer";
 				integer  = aspell_config_retrieve_int(config, key_info->name);
 				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyLong_FromLong( integer );
+				obj      = PyInt_FromLong( integer );
 				break;
 			case AspellKeyInfoBool:
 				key_type = "boolean";
@@ -287,7 +288,7 @@ static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 	AspellMutableContainer* amc;
 	const AspellKeyInfo *key_info;
 
-	PyObject *key_list = 0, *obj = 0;
+	PyObject *key_list, *obj;
 	const char*  string;
 	unsigned int integer;
 	unsigned int boolean;
@@ -315,13 +316,13 @@ static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 				key_type = "string";
 				string   = aspell_config_retrieve(config, key_info->name);
 				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyUnicode_FromString( string );
+				obj      = PyString_FromString( string );
 				break;
 			case AspellKeyInfoInt:
 				key_type = "integer";
 				integer  = aspell_config_retrieve_int(config, key_info->name);
 				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyLong_FromLong( integer );
+				obj      = PyInt_FromLong( integer );
 				break;
 			case AspellKeyInfoBool:
 				key_type = "boolean";
@@ -373,9 +374,9 @@ static PyObject* m_check(PyObject* self, PyObject* args) {
 
 	switch (aspell_speller_check(Speller(self), word, length)) {
 		case 0:
-			Py_RETURN_FALSE;
+			return Py_BuildValue("i", 0);
 		case 1:
-			Py_RETURN_TRUE;
+			return Py_BuildValue("i", 1);
 		default:
 			PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
 			return NULL;
@@ -410,17 +411,6 @@ static PyObject* m_getSessionwordlist(PyObject* self, PyObject* args) {
 	return AspellWordList2PythonList( aspell_speller_session_word_list(Speller(self)));
 }
 
-/* check for any aspell error after a lib call
-   and either raises exception one or returns none  */
-static PyObject* AspellCheckError(PyObject* self) {
-	if (aspell_speller_error(Speller(self)) != 0) {
-		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
-		return NULL;
-	}
-	else
-		Py_RETURN_NONE;
-}
-
 /* method:addtoPersonal *******************************************************/
 static PyObject* m_addtoPersonal(PyObject* self, PyObject* args) {
 	char *word;
@@ -432,7 +422,11 @@ static PyObject* m_addtoPersonal(PyObject* self, PyObject* args) {
 	}
 
 	aspell_speller_add_to_personal(Speller(self), word, length);
-	return AspellCheckError(self);
+	if (aspell_speller_error(Speller(self)) != 0) {
+		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+		return NULL;
+	}
+	return_None;
 }
 
 /* method:addtoSession ********************************************************/
@@ -446,19 +440,32 @@ static PyObject* m_addtoSession(PyObject* self, PyObject* args) {
 	}
 
 	aspell_speller_add_to_session(Speller(self), word, length);
-	return AspellCheckError(self);
+	if (aspell_speller_error(Speller(self)) != 0) {
+		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+		return NULL;
+	}
+	return_None;
 }
 
 /* method:clearsession ********************************************************/
 static PyObject* m_clearsession(PyObject* self, PyObject* args) {
 	aspell_speller_clear_session(Speller(self));
-	return AspellCheckError(self);
+	if (aspell_speller_error(Speller(self)) != 0) {
+		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+		return NULL;
+	}
+
+	return_None;
 }
 
 /* method:saveallwords ********************************************************/
 static PyObject* m_saveallwords(PyObject* self, PyObject* args) {
 	aspell_speller_save_all_word_lists(Speller(self));
-	return AspellCheckError(self);
+	if (aspell_speller_error(Speller(self)) != 0) {
+		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+		return NULL;
+	}
+	return_None;
 }
 /* method:addReplacement ******************************************************/
 static PyObject* m_addReplacement(PyObject* self, PyObject* args) {
@@ -470,7 +477,11 @@ static PyObject* m_addReplacement(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 	aspell_speller_store_replacement(Speller(self), mis, ml, cor, cl);
-	return AspellCheckError(self);
+	if (aspell_speller_error(Speller(self)) != 0) {
+		PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+		return NULL;
+	}
+	return_None;
 }
 
 /* AspellSpeller methods table */
@@ -562,48 +573,23 @@ static PyMethodDef aspell_object_methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
+static PyObject* speller_getattr(PyObject *obj, char *name) {
+	return Py_FindMethod(aspell_object_methods, obj, name);
+}
+
 static PyTypeObject aspell_AspellType = {
-	PyVarObject_HEAD_INIT(&PyType_Type, 0)
-	"AspellSpeller",												/* tp_name */
-	sizeof(aspell_AspellObject),						/* tp_size */
-	0,																			/* tp_itemsize? */
-	(destructor)speller_dealloc,            /* tp_dealloc */
-	0,                                      /* tp_print */
-	0,                                         /* tp_getattr */
-	0,                                          /* tp_setattr */
-	0,                                          /* tp_reserved */
-	0,														              /* tp_repr */
-	0,                                          /* tp_as_number */
-	0,                                          /* tp_as_sequence */
-	0,                                          /* tp_as_mapping */
-	0,                                          /* tp_hash */
-	0,                                          /* tp_call */
-	0,                                          /* tp_str */
-	PyObject_GenericGetAttr,                    /* tp_getattro */
-	0,                                          /* tp_setattro */
-	0,                                          /* tp_as_buffer */
-	Py_TPFLAGS_DEFAULT,                         /* tp_flags */
-	0,                                          /* tp_doc */
-	0,                                          /* tp_traverse */
-	0,                                          /* tp_clear */
-	0,                                          /* tp_richcompare */
-	0,                                          /* tp_weaklistoffset */
-	0,                                          /* tp_iter */
-	0,                                          /* tp_iternext */
-	aspell_object_methods,                      /* tp_methods */
-	0,							                            /* tp_members */
-	0,                                          /* tp_getset */
-	0,                                          /* tp_base */
-	0,                                          /* tp_dict */
-	0,                                          /* tp_descr_get */
-	0,                                          /* tp_descr_set */
-	0,                                          /* tp_dictoffset */
-	0,                                          /* tp_init */
-	0,                                          /* tp_alloc */
-	0,                                          /* tp_new */
+	PyObject_HEAD_INIT(NULL)
+	0,
+	"AspellSpeller",
+	sizeof(aspell_AspellObject),
+	0,
+
+	speller_dealloc,
+	0,
+	speller_getattr
 };
 
-static PyMethodDef aspell_module_methods[] = {
+static PyMethodDef aspell_methods[] = {
 	{
 		"Speller",
 		new_speller,
@@ -624,20 +610,13 @@ static PyMethodDef aspell_module_methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-static PyModuleDef aspellmodule = {
-	PyModuleDef_HEAD_INIT,
-	"aspell",
-	"aspell wrapper",
-	-1,
-	aspell_module_methods,
-};
-
-PyMODINIT_FUNC
-PyInit_aspell(void) {
+DL_EXPORT(void)
+initaspell(void) {
 	PyObject *module;
 	PyObject *dict;
 
-	module = PyModule_Create(&aspellmodule);
+	aspell_AspellType.ob_type = &PyType_Type;
+	module = Py_InitModule("aspell", aspell_methods);
 	dict   = PyModule_GetDict(module);
 
 	_AspellSpellerException = PyErr_NewException("aspell.AspellSpellerError", NULL, NULL);
@@ -647,8 +626,6 @@ PyInit_aspell(void) {
 	PyDict_SetItemString(dict, "AspellSpellerError", _AspellSpellerException);
 	PyDict_SetItemString(dict, "AspellModuleError", _AspellModuleException);
 	PyDict_SetItemString(dict, "AspellConfigError", _AspellConfigException);
-
-	return module;
 }
 
 /*
