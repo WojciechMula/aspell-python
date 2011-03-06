@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Python wrapper for aspell, version 1.1
+        Python wrapper for aspell, version 1.12
 
         Tested with:
         * aspell 0.60.2 & python 3.2
@@ -231,23 +231,26 @@ static void speller_dealloc(PyObject* self) {
 	PyObject_Del(self);
 }
 
-/* ConfigKeys *****************************************************************/
-static PyObject* configkeys(PyObject* _) {
 
+static PyObject* configkeys_helper(PyObject* self) {
 	AspellConfig* config;
 	AspellKeyInfoEnumeration *keys_enumeration;
 	AspellStringList* lst;
 	AspellMutableContainer* amc;
 	const AspellKeyInfo *key_info;
 
-	PyObject *key_list = 0, *obj = 0;
+	PyObject *dict = 0, *obj = 0, *value = 0;
 	const char*  string;
 	unsigned int integer;
 	unsigned int boolean;
 
 	char *key_type = 0;
 
-	config = new_aspell_config();
+	if (self)
+		config = aspell_speller_config(Speller(self));
+	else
+		config = new_aspell_config();
+
 	if (config == NULL) {
 		PyErr_SetString(_AspellModuleException, "can't create config");
 		return NULL;
@@ -255,11 +258,17 @@ static PyObject* configkeys(PyObject* _) {
 
 	keys_enumeration = aspell_config_possible_elements(config, 1);
 	if (!keys_enumeration) {
+		if (!self) delete_aspell_config(config);
 		PyErr_SetString(_AspellConfigException, "can't get list of config keys");
 		return NULL;
 	}
 
-	key_list = PyList_New(0);
+	dict = PyDict_New();
+	if (dict == NULL) {
+		if (!self) delete_aspell_config(config);
+		return NULL;
+	}
+		
 	while ((key_info = aspell_key_info_enumeration_next(keys_enumeration))) {
 
 		/* key type -> string */
@@ -294,102 +303,46 @@ static PyObject* configkeys(PyObject* _) {
 				break;
 		}
 
-		if (PyList_Append(key_list, Py_BuildValue("(ssOs)", key_info->name, key_type, obj, key_info->desc ? key_info->desc : "internal")) == -1) {
-			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
-			delete_aspell_key_info_enumeration(keys_enumeration);
-			Py_DECREF(key_list);
-			return NULL;
+		/* value */
+		value = Py_BuildValue("(sOs)",
+							key_type,
+							obj,
+							key_info->desc ? key_info->desc : "internal"
+		);
+
+		if (value) {
+			if (PyDict_SetItemString(dict, key_info->name, value)) {
+				goto python_error;
+			}
+			else
+				Py_DECREF(value);
 		}
+		else
+			goto python_error;
 	}
+	
 	delete_aspell_key_info_enumeration(keys_enumeration);
-	delete_aspell_config(config);
-	return key_list;
+	if (!self) delete_aspell_config(config);
+	return dict;
 
 config_get_error:
 	PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
+python_error:
 	delete_aspell_key_info_enumeration(keys_enumeration);
-	delete_aspell_config(config);
-	Py_DECREF(key_list);
+	if (!self) delete_aspell_config(config);
+	Py_DECREF(dict);
 	return NULL;
+}
+
+
+/* ConfigKeys *****************************************************************/
+static PyObject* configkeys(PyObject* _) {
+	return configkeys_helper(NULL);
 }
 
 /* method:ConfigKeys **********************************************************/
 static PyObject* m_configkeys(PyObject* self, PyObject* args) {
-
-	AspellConfig* config;
-	AspellKeyInfoEnumeration *keys_enumeration;
-	AspellStringList* lst;
-	AspellMutableContainer* amc;
-	const AspellKeyInfo *key_info;
-
-	PyObject *key_list = 0, *obj = 0;
-	const char*  string;
-	unsigned int integer;
-	unsigned int boolean;
-
-	char *key_type = 0;
-
-	config = aspell_speller_config(Speller(self));
-	if (config == NULL) {
-		PyErr_SetString(_AspellModuleException, "can't create config");
-		return NULL;
-	}
-
-	keys_enumeration = aspell_config_possible_elements(config, 1);
-	if (!keys_enumeration) {
-		PyErr_SetString(_AspellConfigException, "can't get list of config keys");
-		return NULL;
-	}
-
-	key_list = PyList_New(0);
-	while ((key_info = aspell_key_info_enumeration_next(keys_enumeration))) {
-
-		/* key type -> string */
-		switch (key_info->type) {
-			case AspellKeyInfoString:
-				key_type = "string";
-				string   = aspell_config_retrieve(config, key_info->name);
-				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyUnicode_FromString( string );
-				break;
-			case AspellKeyInfoInt:
-				key_type = "integer";
-				integer  = aspell_config_retrieve_int(config, key_info->name);
-				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyLong_FromLong( integer );
-				break;
-			case AspellKeyInfoBool:
-				key_type = "boolean";
-				boolean  = aspell_config_retrieve_bool(config, key_info->name);
-				if (aspell_config_error(config) != NULL) goto config_get_error;
-				obj      = PyBool_FromLong( boolean );
-				break;
-			case AspellKeyInfoList:
-				key_type = "list";
-				lst = new_aspell_string_list();
-				amc = aspell_string_list_to_mutable_container(lst);
-				aspell_config_retrieve_list(config, key_info->name, amc);
-				if (aspell_config_error(config) != NULL) goto config_get_error;
-
-				obj = AspellStringList2PythonList(lst);
-				delete_aspell_string_list(lst);
-				break;
-		}
-
-		if (PyList_Append(key_list, Py_BuildValue("(ssO)", key_info->name, key_type, obj)) == -1) {
-			delete_aspell_key_info_enumeration(keys_enumeration);
-			Py_DECREF(key_list);
-			return NULL;
-		}
-	}
-	delete_aspell_key_info_enumeration(keys_enumeration);
-	return key_list;
-
-config_get_error:
-	PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
-	delete_aspell_key_info_enumeration(keys_enumeration);
-	Py_DECREF(key_list);
-	return NULL;
+	return configkeys_helper(self);
 }
 
 
@@ -593,9 +546,9 @@ static PyMethodDef aspell_object_methods[] = {
 		"check",
 		(PyCFunction)m_check,
 		METH_VARARGS,
-		"check(word) => 0 or 1\n"
+		"check(word) => bool\n"
  		"Checks spelling of word.\n"
-		"Returns 1 if word is correct, 0 otherwise."
+		"Returns if word is correct."
 	},
 	{
 		"suggest",
