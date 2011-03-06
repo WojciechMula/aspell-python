@@ -51,7 +51,7 @@ class TestSuggestMethod(TestBase):
 
 
 class TestAddReplacementMethod(TestBase):
-	def _test(self):
+	def test(self):
 		"addReplacement affects on order of words returing by suggest"
 
 		wrong		= 'wrod'
