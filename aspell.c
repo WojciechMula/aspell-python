@@ -1,11 +1,9 @@
 /*****************************************************************************
 
-        Python wrapper for aspell, version 1.0
+        Python wrapper for aspell, version 1.1
 
         Tested with:
-        * aspell 0.50.5 & python 2.1
-        * aspell 0.50.5 & python 2.3.4, 3.4.1
-        * aspell 0.60.2 & python 2.3.4
+        * aspell 0.60.2 & python 3.2
 
         Released under BSD license
 
@@ -39,18 +37,43 @@
  -       04.2006:
               * license is BSD now
 
- -    2011-03-11:
+ -    2011-02-21, 2011-03-06:
 							* compliance with py3k
 
-$Id: aspell.c,v 1.2 2006-09-27 16:45:16 wojtek Exp $
+$Id$
 ******************************************************************************/
 
 #include <Python.h>
 #include <aspell.h>
 
+#define Speller(pyobject) (((aspell_AspellObject*)pyobject)->speller)
+#define Encoding(pyobject) (((aspell_AspellObject*)pyobject)->encoding)
+
+static char* DefaultEncoding = "ascii";
+
+static PyTypeObject aspell_AspellType;
+
+/* error reported by speller */
+static PyObject* _AspellSpellerException;
+
+/* error reported by speller's config */
+static PyObject* _AspellConfigException;
+
+/* error reported by module */
+static PyObject* _AspellModuleException;
+
+typedef struct {
+	PyObject_HEAD
+	char* encoding; /* internal encoding */
+	AspellSpeller* speller;	/* the speller */
+} aspell_AspellObject;
+
+
 /* helper function: converts an aspell word list into python list */
-static PyObject* AspellWordList2PythonList(const AspellWordList* wordlist) {
+static PyObject* AspellWordList2PythonList(PyObject* self, const AspellWordList* wordlist) {
 	PyObject* list;
+	PyObject* elem;
+
 	AspellStringEnumeration* elements;
 	const char* word;
 
@@ -61,13 +84,23 @@ static PyObject* AspellWordList2PythonList(const AspellWordList* wordlist) {
 	}
 
 	elements = aspell_word_list_elements(wordlist);
-	while ( (word=aspell_string_enumeration_next(elements)) != 0)
-		if (PyList_Append(list, Py_BuildValue("s", word)) == -1) {
-			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
+	while ( (word=aspell_string_enumeration_next(elements)) != 0) {
+		elem = PyUnicode_Decode(word, strlen(word), Encoding(self), NULL);
+
+		if (elem == 0) {
 			delete_aspell_string_enumeration(elements);
 			Py_DECREF(list);
 			return NULL;
 		}
+
+		if (PyList_Append(list, elem) == -1) {
+			delete_aspell_string_enumeration(elements);
+			Py_DECREF(elem);
+			Py_DECREF(list);
+			return NULL;
+		}
+	}
+
 	delete_aspell_string_enumeration(elements);
 	return list;
 }
@@ -96,25 +129,6 @@ static PyObject* AspellStringList2PythonList(const AspellStringList* wordlist) {
 	return list;
 }
 
-
-static PyTypeObject aspell_AspellType;
-
-/* error reported by speller */
-static PyObject* _AspellSpellerException;
-
-/* error reported by speller's config */
-static PyObject* _AspellConfigException;
-
-/* error reported by module */
-static PyObject* _AspellModuleException;
-
-typedef struct {
-	PyObject_HEAD
-	AspellSpeller* speller;	/* the speller */
-} aspell_AspellObject;
-
-#define Speller(pyobject) (((aspell_AspellObject*)pyobject)->speller)
-
 /* Create a new speller *******************************************************/
 static PyObject* new_speller(PyObject* self, PyObject* args) {
 	aspell_AspellObject* newobj;
@@ -126,6 +140,7 @@ static PyObject* new_speller(PyObject* self, PyObject* args) {
 	int i;
 	int n; /* arg count */
 	char *key, *value;
+	char *encoding;
 
 	config = new_aspell_config();
 	if (config == NULL) {
@@ -159,13 +174,11 @@ static PyObject* new_speller(PyObject* self, PyObject* args) {
 					goto arg_error;
 				}
 			}
-			Py_DECREF(args);
 			break;
 	}
 
 	/* try to create a new speller */
 	possible_error = new_aspell_speller(config);
-	delete_aspell_config(config);
 
 	if (aspell_error_number(possible_error) == 0)
 		/* save a speller */
@@ -173,13 +186,32 @@ static PyObject* new_speller(PyObject* self, PyObject* args) {
 	else {
 		/* or raise an exception */
 		PyErr_SetString(_AspellSpellerException, aspell_error_message(possible_error));
+		delete_aspell_config(config);
 		delete_aspell_can_have_error(possible_error);
 		return NULL;
 	}
 
+	/* get encoding */
+	encoding = NULL;
+	value = (char*)aspell_config_retrieve(config, "encoding");
+	if (value) {
+		if (strcmp(value, "none") != 0) {
+			encoding = (char*)malloc(strlen(value)+1);
+			if (encoding)
+				strcpy(encoding, value);
+		}
+	}
+
+	if (encoding == NULL)
+		encoding = DefaultEncoding;
+	
+	// free config
+	delete_aspell_config(config);
+
 	/* create a new py-object */
   newobj = (aspell_AspellObject*)PyObject_New(aspell_AspellObject, &aspell_AspellType);
 	newobj->speller = speller;
+	newobj->encoding = encoding;
 
 	return (PyObject*)newobj;
 
@@ -192,6 +224,9 @@ arg_error:
 
 /* Delete speller *************************************************************/
 static void speller_dealloc(PyObject* self) {
+	if (Encoding(self) != DefaultEncoding)
+		free(Encoding(self));
+
 	delete_aspell_speller( Speller(self) );
 	PyObject_Del(self);
 }
@@ -342,7 +377,6 @@ static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 		}
 
 		if (PyList_Append(key_list, Py_BuildValue("(ssO)", key_info->name, key_type, obj)) == -1) {
-			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
 			delete_aspell_key_info_enumeration(keys_enumeration);
 			Py_DECREF(key_list);
 			return NULL;
@@ -358,56 +392,109 @@ config_get_error:
 	return NULL;
 }
 
-/* method:check ***************************************************************/
-static PyObject* m_check(PyObject* self, PyObject* args) {
-	char* word;
-	int   length;
 
-	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
-		PyErr_SetString(PyExc_TypeError, "a string is required");
+static PyObject* get_arg_string(
+	PyObject* self,	// [in]
+	PyObject* args,	// [in]
+	const int index,// [in] args[index]
+	char** word,		// [out]
+	Py_ssize_t* size	// [out]
+) {
+	PyObject* obj;
+	PyObject* buf;
+
+	obj = PyTuple_GetItem(args, index);
+	if (obj == NULL)
+		return NULL;
+
+	/* unicode */
+	if (PyUnicode_Check(obj))
+		/* convert to buffer */
+		buf = PyUnicode_AsEncodedString(obj, Encoding(self), "strict");
+	else
+	/* buffer */
+	if (PyBytes_Check(obj)) {
+		buf = obj;
+		Py_INCREF(buf);	// PyTuple_GetItem returns borrowed reference
+	}
+	else {
+		PyErr_SetString(PyExc_TypeError, "string of bytes required");
 		return NULL;
 	}
 
-	if (!length)
-		return Py_BuildValue("i", 1);
-
-	switch (aspell_speller_check(Speller(self), word, length)) {
-		case 0:
-			Py_RETURN_FALSE;
-		case 1:
-			Py_RETURN_TRUE;
-		default:
-			PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+	/* unpack buffer */
+	if (buf) {
+		if (PyBytes_AsStringAndSize(buf, word, size) != -1) {
+			return buf;
+		}
+		else {
+			Py_DECREF(buf);
 			return NULL;
+		}
 	}
+	else
+		return NULL;
+}
+
+/* method:check ***************************************************************/
+static PyObject* m_check(PyObject* self, PyObject* args) {
+	char*	word;
+	Py_ssize_t length;
+	PyObject* buf;
+
+	buf = get_arg_string(self, args, 0, &word, &length);
+	if (buf != NULL)
+		switch (aspell_speller_check(Speller(self), word, length)) {
+			case 0:
+				Py_DECREF(buf);
+				Py_RETURN_FALSE;
+			case 1:
+				Py_DECREF(buf);
+				Py_RETURN_TRUE;
+			default:
+				Py_DECREF(buf);
+				PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
+				return NULL;
+		} // switch
+	else
+		return NULL;
 }
 
 /* method:suggest ************************************************************/
 static PyObject* m_suggest(PyObject* self, PyObject* args) {
 	char* word;
 	int   length;
+	PyObject* buf;
+	PyObject* list;
 
-	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
-		PyErr_SetString(PyExc_TypeError, "string expeced");
-		return NULL;
+	buf = get_arg_string(self, args, 0, &word, &length);
+	if (buf) {
+		list = AspellWordList2PythonList(
+			self,
+			aspell_speller_suggest(Speller(self),
+			word,
+			length)
+		);
+		Py_DECREF(buf);
+		return list;
 	}
-
-	return AspellWordList2PythonList( aspell_speller_suggest(Speller(self), word, length));
+	else
+		return NULL;
 }
 
 /* method:getMainwordlist *****************************************************/
 static PyObject* m_getMainwordlist(PyObject* self, PyObject* args) {
-	return AspellWordList2PythonList( aspell_speller_main_word_list(Speller(self)));
+	return AspellWordList2PythonList(self, aspell_speller_main_word_list(Speller(self)));
 }
 
 /* method:getPersonalwordlist *************************************************/
 static PyObject* m_getPersonalwordlist(PyObject* self, PyObject* args) {
-	return AspellWordList2PythonList( aspell_speller_personal_word_list(Speller(self)));
+	return AspellWordList2PythonList(self, aspell_speller_personal_word_list(Speller(self)));
 }
 
 /* method:getSessionwordlist **************************************************/
 static PyObject* m_getSessionwordlist(PyObject* self, PyObject* args) {
-	return AspellWordList2PythonList( aspell_speller_session_word_list(Speller(self)));
+	return AspellWordList2PythonList(self, aspell_speller_session_word_list(Speller(self)));
 }
 
 /* check for any aspell error after a lib call
@@ -439,14 +526,17 @@ static PyObject* m_addtoPersonal(PyObject* self, PyObject* args) {
 static PyObject* m_addtoSession(PyObject* self, PyObject* args) {
 	char *word;
 	int   length;
+	PyObject* buf;
 
-	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
-		PyErr_SetString(PyExc_TypeError, "Invalid argument");
-		return NULL;
+	buf = get_arg_string(self, args, 0, &word, &length);
+	if (buf) {
+		aspell_speller_add_to_session(Speller(self), word, length);
+		Py_DECREF(buf);
+		return AspellCheckError(self);
 	}
+	else
+		return NULL;
 
-	aspell_speller_add_to_session(Speller(self), word, length);
-	return AspellCheckError(self);
 }
 
 /* method:clearsession ********************************************************/
@@ -460,16 +550,30 @@ static PyObject* m_saveallwords(PyObject* self, PyObject* args) {
 	aspell_speller_save_all_word_lists(Speller(self));
 	return AspellCheckError(self);
 }
+
 /* method:addReplacement ******************************************************/
 static PyObject* m_addReplacement(PyObject* self, PyObject* args) {
 	char *mis; int ml;
 	char *cor; int cl;
+	PyObject* Mbuf;
+	PyObject* Cbuf;
 
-	if (!PyArg_ParseTuple(args, "s#s#", &mis, &ml, &cor, &cl)) {
-		PyErr_SetString(PyExc_TypeError, "two strings are required (misspelled, correct word)");
+	Mbuf = get_arg_string(self, args, 0, &mis, &ml);
+	if (Mbuf == NULL) {
+		PyErr_SetString(PyExc_TypeError, "first argument have to be a string or bytes");
 		return NULL;
 	}
+
+	Cbuf = get_arg_string(self, args, 1, &cor, &cl);
+	if (Cbuf == NULL) {
+		Py_DECREF(Mbuf);
+		PyErr_SetString(PyExc_TypeError, "second argument have to be a string or bytes");
+		return NULL;
+	}
+
 	aspell_speller_store_replacement(Speller(self), mis, ml, cor, cl);
+	Py_DECREF(Mbuf);
+	Py_DECREF(Cbuf);
 	return AspellCheckError(self);
 }
 
