@@ -128,7 +128,6 @@ class TestSessionwordlist(TestBase):
 		self.all_incorrect()
 
 
-
 class TestPersonalwordlist(TestBase):
 	
 	def setUp(self):
