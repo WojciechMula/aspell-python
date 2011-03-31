@@ -11,16 +11,24 @@
         wojciech_mula@poczta.onet.pl
 
  History:
- - 20-22.08.2004:
-              * first version of module
- -    28.08.2004:
-              * tested with python 2.3.4
-              * now aspell.new accepts list of config keys
-                (see typescript2.txt for examples)
- -     7.10.2004:
-              * fixed saveAllwords method
-                patch by Helmut Jarausch
+ - 2011-03-31:
+   * added __contains__ method
 
+ - 2011-03-xx:
+   * ConfigKeys returns dictionary
+
+ - 2011-02-21, 2011-03-06:
+	 * compliance with py3k
+
+ - 2006-04-xx:
+   * license is BSD now
+
+ -    18.08.2005:
+              * fixed method ConfigKeys - now works with aspell 0.60
+							  thanks to Gora Mohanty for note
+						  * fixed stupid bug in Speller
+ -    29.01.2005:
+              * added method ConfigKeys()
  -    30.12.2004:
               * new() constructor replaced with Speller()
               * constructor accepts now much simpler syntax for passing
@@ -28,17 +36,15 @@
               * removed methods releated to configuratinon from AspellSpeller
                 object
               * global method ConfigKeys()
- -    29.01.2005:
-              * added method ConfigKeys()
- -    18.08.2005:
-              * fixed method ConfigKeys - now works with aspell 0.60
-							  thanks to Gora Mohanty for note
-						  * fixed stupid bug in Speller
- -       04.2006:
-              * license is BSD now
-
- -    2011-02-21, 2011-03-06:
-							* compliance with py3k
+ -     7.10.2004:
+              * fixed saveAllwords method
+                patch by Helmut Jarausch
+ -    28.08.2004:
+              * tested with python 2.3.4
+              * now aspell.new accepts list of config keys
+                (see typescript2.txt for examples)
+ - 20-22.08.2004:
+              * first version of module
 
 $Id$
 ******************************************************************************/
@@ -731,7 +737,7 @@ PyInit_aspell(void) {
 	if (module == NULL)
 		return NULL;
 
-	dict   = PyModule_GetDict(module);
+	dict = PyModule_GetDict(module);
 
 	speller_as_sequence.sq_contains = m_contains;
 	aspell_AspellType.tp_as_sequence = &speller_as_sequence;
