@@ -4,8 +4,8 @@ aspell-python 1.12
 .. contents::
 
 
-WHAT IS IT?
------------
+Introduction
+------------
 
 **aspell-python** is a Python_ wrapper for `GNU Aspell`_. There are
 two versions, one compatible with Python 2.x and other with Python 3.x.
@@ -20,7 +20,7 @@ not older then 2.0.
 Version for Py3 has been tested with Python 3.2.
 
 News
------------------
+----
 
 * 2011-03-06: version for Python 3.x
 * License of module has been changed --- now it is BSD_.
@@ -32,7 +32,8 @@ News
 Whats new in version 1.12?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* In Py3 method/function ConfigKeys_ returns dictionary.
+* Py3k: added support for ``in`` operator.
+* Py3k: method/function ConfigKeys_ returns dictionary.
 
 Whats new in version 1.11?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,28 +117,23 @@ Documentation
 
 	import aspell
 
-The module provides AspellSpeller_ object, two methods, and three types
+The module provides Speller_ class, two methods, and three types
 of exceptions --- all described below.
 
 
 Methods
 ~~~~~~~
 
-* ConfigKeys
-* Speller
 
-ConfigKeys()
-^^^^^^^^^^^^
+.. _ConfigKeysMeth:
 
-Method returns a list of available configuration keys.
-Items on the list are 4-tuples:
+ConfigKeys() => dictionary
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* key name
-* key type:
-	* string
-	* integer
-	* boolean
-	* list
+Method returns a dictionary, where keys are names of configuration
+item, values are 3-tuples:
+
+* key type (``string``, ``integer``, ``boolean``, ``list``)
 * default value for the key
 * short description - "internal" means that aspell doesn't provide
   any description of item and you shouldn't set/change it, unless
@@ -146,7 +142,7 @@ Items on the list are 4-tuples:
 
 Aspell's documentation covers in details all of keys and their meaning.
 Below is a list of most useful and obvious options (it is a filtered
-output of ConfigKeys).
+output of ``ConfigKeys``).
 
 ::
 
@@ -171,13 +167,16 @@ output of ConfigKeys).
 	('suggest', 'boolean', True, 'suggest possible replacements')
 
 
+Classes
+~~~~~~~
+
 _`Speller`\ ()
 ^^^^^^^^^^^^^^
 
 Method creates an AspellSpeller_ object which is an interface to the GNU
 Aspell.
 
-Speller called with no parameters creates speller using default
+``Speller`` called with no parameters creates speller using default
 configuration. If you want to change or set some parameter you can pass
 pair of strings: key and it's value. One can get available keys using
 ConfigKeys_.
@@ -199,7 +198,7 @@ Module defines following errors:
 * AspellModuleError_ and
 * AspellSpellerError_.
 
-Additionally TypeError is raised when you pass wrong parameters to
+Additionally ``TypeError`` is raised when you pass wrong parameters to
 method.
 
 _`AspellConfigError`
@@ -262,22 +261,14 @@ earlier:
 >>>
 
 
-_`ConfigKeys`\ (word) => list of settings of speller
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_`ConfigKeys`\ () => dictionary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+**New in version 1.1, changed in 1.13.**
 
-**New in version 1.1.**
+Method returns current configuration of speller.
 
-Method returns a list of the **speller's** configuration keys.
-Items on the list are 3-tuples:
-
-1. key name
-2. key type:
-	* string
-	* integer
-	* boolean
-	* list
-3. value for the key
+Result has the same meaning as ``ConfigKeys()`` procedure.
 
 
 _`check`\ (word) => boolean
@@ -290,6 +281,17 @@ the main or personal (see addtoPersonal_) or session dictionary
 >>> s.check('word') # correct word
 True
 >>> s.check('wrod') # incorrect
+False
+>>>
+
+**New in version 1.13.**
+
+It's possible to use operator ``in`` or ``not in`` instead
+of ``check()``.
+
+>>> 'word' in s
+True
+>>> 'wrod' in s
 False
 >>>
 
@@ -534,9 +536,9 @@ needed. Here is a sample session (polish dictionary is used).
 >>> import aspell
 >>> s=aspell.Speller('lang', 'pl')
 >>> 
->>> [i for i in s.ConfigKeys() if i[0]=='encoding']
+>>> s.ConfigKeys()['encoding']
 [('encoding', 'string', 'iso8859-2')]
->>> enc = [i for i in s.ConfigKeys() if i[0]=='encoding'][0][2]
+>>> enc =s.ConfigKeys()['encoding'][2]
 >>> enc  # dictionary encoding
 'iso8859-2'
 >>> word # encoding of word is utf8
