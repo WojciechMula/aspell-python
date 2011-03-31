@@ -130,7 +130,7 @@ static PyObject* AspellStringList2PythonList(const AspellStringList* wordlist) {
 }
 
 /* Create a new speller *******************************************************/
-static PyObject* new_speller(PyObject* self, PyObject* args) {
+static PyObject* new_speller(PyTypeObject* self, PyObject* args, PyObject* kwargs) {
 	aspell_AspellObject* newobj;
 
 	AspellSpeller* speller = 0;
@@ -346,19 +346,13 @@ static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 }
 
 
-static PyObject* get_arg_string(
+static PyObject* get_single_arg_string(
 	PyObject* self,	// [in]
-	PyObject* args,	// [in]
-	const int index,// [in] args[index]
+	PyObject* obj,	// [in]
 	char** word,		// [out]
 	Py_ssize_t* size	// [out]
 ) {
-	PyObject* obj;
 	PyObject* buf;
-
-	obj = PyTuple_GetItem(args, index);
-	if (obj == NULL)
-		return NULL;
 
 	/* unicode */
 	if (PyUnicode_Check(obj))
@@ -389,26 +383,68 @@ static PyObject* get_arg_string(
 		return NULL;
 }
 
-/* method:check ***************************************************************/
-static PyObject* m_check(PyObject* self, PyObject* args) {
+
+static PyObject* get_arg_string(
+	PyObject* self,	// [in]
+	PyObject* args,	// [in]
+	const int index,// [in] args[index]
+	char** word,		// [out]
+	Py_ssize_t* size	// [out]
+) {
+	PyObject* obj;
+
+	obj = PyTuple_GetItem(args, index);
+	if (obj)
+		return get_single_arg_string(self, obj, word, size);
+	else
+		return NULL;
+}
+
+
+/* method:__contains__ ********************************************************/
+static int
+m_contains(PyObject* self, PyObject* args) {
 	char*	word;
 	Py_ssize_t length;
 	PyObject* buf;
 
-	buf = get_arg_string(self, args, 0, &word, &length);
+	buf = get_single_arg_string(self, args, &word, &length);
 	if (buf != NULL)
 		switch (aspell_speller_check(Speller(self), word, length)) {
 			case 0:
 				Py_DECREF(buf);
-				Py_RETURN_FALSE;
+				return 0;
+
 			case 1:
 				Py_DECREF(buf);
-				Py_RETURN_TRUE;
+				return 1;
+
 			default:
 				Py_DECREF(buf);
 				PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
-				return NULL;
+				return -1;
 		} // switch
+	else
+		return -1;
+}
+
+
+/* method:check ***************************************************************/
+static PyObject* m_check(PyObject* self, PyObject* args) {
+	PyObject* word;
+
+	word = PyTuple_GetItem(args, 0);
+	if (word)
+		switch (m_contains(self, word)) {
+			case 0:
+				Py_RETURN_FALSE;
+			
+			case 1:
+				Py_RETURN_TRUE;
+
+			default:
+				return NULL;
+		}
 	else
 		return NULL;
 }
@@ -657,16 +693,13 @@ static PyTypeObject aspell_AspellType = {
 	0,                                          /* tp_dictoffset */
 	0,                                          /* tp_init */
 	0,                                          /* tp_alloc */
-	0,                                          /* tp_new */
+	new_speller,																/* tp_new */
 };
 
+
+static PySequenceMethods speller_as_sequence;
+
 static PyMethodDef aspell_module_methods[] = {
-	{
-		"Speller",
-		new_speller,
-		METH_VARARGS,
-		"Create a new AspellSpeller object"
-	},
 	{
 		"ConfigKeys",
 		(PyCFunction)configkeys,
@@ -695,15 +728,28 @@ PyInit_aspell(void) {
 	PyObject *dict;
 
 	module = PyModule_Create(&aspellmodule);
+	if (module == NULL)
+		return NULL;
+
 	dict   = PyModule_GetDict(module);
+
+	speller_as_sequence.sq_contains = m_contains;
+	aspell_AspellType.tp_as_sequence = &speller_as_sequence;
+
+	if (PyType_Ready(&aspell_AspellType) < 0) {
+		Py_DECREF(module);
+		return NULL;
+	}
+	else
+		PyModule_AddObject(module, "Speller", (PyObject*)&aspell_AspellType);
 
 	_AspellSpellerException = PyErr_NewException("aspell.AspellSpellerError", NULL, NULL);
 	_AspellModuleException  = PyErr_NewException("aspell.AspellModuleError", NULL, NULL);
 	_AspellConfigException  = PyErr_NewException("aspell.AspellConfigError", NULL, NULL);
 
-	PyDict_SetItemString(dict, "AspellSpellerError", _AspellSpellerException);
-	PyDict_SetItemString(dict, "AspellModuleError", _AspellModuleException);
-	PyDict_SetItemString(dict, "AspellConfigError", _AspellConfigException);
+	PyModule_AddObject(module, "AspellSpellerError", _AspellSpellerException);
+	PyModule_AddObject(module, "AspellModuleError", _AspellModuleException);
+	PyModule_AddObject(module, "AspellConfigError", _AspellConfigException);
 
 	return module;
 }

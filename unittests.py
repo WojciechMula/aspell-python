@@ -15,8 +15,8 @@ class TestBase(unittest.TestCase):
 
 		# get current speller configuration
 		self.config  = dict(
-			(name, value) for name, type, value in
-				self.speller.ConfigKeys()
+			(name, value) for name, (type, value, desc) in
+				self.speller.ConfigKeys().items()
 		)
 		
 		# polish words (cat, tree, spring) not existing in english dict
@@ -35,6 +35,18 @@ class TestCheckMethod(TestBase):
 		words = ['misteke', 'zo', 'tre', 'bicyle']
 		for word in words:
 			self.assertFalse(self.speller.check(word))
+
+
+	def test_in(self):
+		words = ['word', 'flower', 'tree', 'rock', 'cat', 'winter']
+		for word in words:
+			self.assertTrue(word in self.speller)
+
+	def test_notin(self):
+		words = ['misteke', 'zo', 'tre', 'bicyle']
+		for word in words:
+			self.assertFalse(word in self.speller)
+			self.assertTrue(word not in self.speller)
 
 
 class TestSuggestMethod(TestBase):

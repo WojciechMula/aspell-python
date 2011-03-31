@@ -120,6 +120,9 @@ class AspellLinux(object):
 			raise TypeError("String expected")
 
 
+	__contains__ = check
+
+
 	def suggest(self, word):
 		"""
 		Return list of spelling suggestions of given word.
@@ -374,6 +377,7 @@ Aspell = AspellLinux
 if __name__ == '__main__':
 	# TODO: more test cases
 	a = Aspell(("lang", "en"))
+	print("when" in a)
 	print(a.check("when"))
 	print(a.suggest("wehn"))
 	a.add_replacement_pair("wehn", "ween")
