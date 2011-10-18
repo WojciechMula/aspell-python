@@ -1,0 +1,14 @@
+Full documentation is available at http://0x80.pl/proj/aspell-python.
+
+To build & install module for python2.x please
+use script setup.2.py, i.e.:
+
+	$ python setup.2.py build
+	$ python setup.2.py install
+
+Module for python3.x is build with setup.py:
+
+	$ python setup.py build
+	$ python setup.py install
+
+[EOF]

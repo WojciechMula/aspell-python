@@ -4,14 +4,14 @@ from distutils.core import setup, Extension
 module = Extension('aspell',
 	libraries = ['aspell'],
 	library_dirs = ['/usr/local/lib/'],
-	sources = ['aspell.c']
+	sources = ['aspell.2.c']
 )
 
 setup (name = 'aspell-python',
 	version = '1.12',
 	ext_modules = [module],
 
-	description      = "Wrapper around GNU Aspell for python3.x",
+	description      = "Wrapper around GNU Aspell for python2.x",
 	author           = "Wojciech Muła",
 	author_email     = "wojciech_mula@poczta.onet.pl",
 	maintainer       = "Wojciech Muła",
