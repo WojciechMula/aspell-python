@@ -77,7 +77,7 @@ Module is covered by BSD_ license.  Author tried to make code usable
 and free of errors, but can't give any guarantees and is not responsible
 for any damages in your software, hardware or anything else.
 
-Wojciech Mu³a, wojciech_mula@poczta.onet.pl
+Wojciech MuÅ‚a, wojciech_mula@poczta.onet.pl
 
 
 Installation
@@ -542,7 +542,7 @@ needed. Here is a sample session (polish dictionary is used).
 >>> enc  # dictionary encoding
 'iso8859-2'
 >>> word # encoding of word is utf8
-# 'g¿eg¿ó³ka' means in some polish dialects 'cuckoo'
+# 'gÅ¼egÅ¼Ã³Å‚ka' means in some polish dialects 'cuckoo'
 'g\xc5\xbceg\xc5\xbc\xc3\xb3\xc5\x82ka'
 >>> s.check(word)
 0
