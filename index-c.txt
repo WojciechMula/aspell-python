@@ -1,92 +1,72 @@
-aspell-python 1.12
-==================
+========================================================================
+              aspell-python - Python bindings for GNU aspell
+========================================================================
 
 .. contents::
 
 
 Introduction
-------------
+============
 
-**aspell-python** is a Python_ wrapper for `GNU Aspell`_. There are
-two versions, one compatible with Python 2.x and other with Python 3.x.
+`GNU Aspell`__ is a leading spelling engine, fast, with many 
+dictionaries available. Take a look at `Python Cookbook`__ ---
+Ryan Kelly have collected links to all python bindings for spellers.
 
-.. _Python: http://www.python.org
-.. _GNU Aspell: http://aspell.net
+**aspell-python** is a Python wrapper for GNU Aspell, there
+are two variants:
+
+* ``pyaspell.py`` --- Python library, that utilize ctypes__
+  module; compatible with python3;
+* ``aspell-python`` --- C extension, two versions are available,
+  one for Python 2.x, and Python 3.x.
+
+C exension exist in two versions: one compatible with Python 2.x
+and other with Python 3.x. 
 
 Version for Py2 has been tested with Python 2.1, Python 2.3.4
 and Python 2.4.1. Probably it works fine with all Python versions
-not older then 2.0.
+not older then 2.0. Version for Py3 has been tested with Python 3.2.
 
-Version for Py3 has been tested with Python 3.2.
-
-News
-----
-
-* 2011-03-06: version for Python 3.x
-* License of module has been changed --- now it is BSD_.
-* **Adam Karpierz** has compiled module with Microsoft Visual Studio 6. See
-  Download_ section.
-
-.. _BSD: http://www.opensource.org/licenses/bsd-license.php
-
-Whats new in version 1.12?
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Py3k: added support for ``in`` operator.
-* Py3k: method/function ConfigKeys_ returns dictionary.
-
-Whats new in version 1.11?
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Fixed ConfigKeys_ method, now works fine with aspell 0.60, but I do not
-  know and I have not possibility to test if it now works with aspell 0.50.
-  **Thanks to Gora Mohanty for mention the bug**.    Now ConfigKeys
-  returns key's value of that type which certain field declare.
-  Previously all values were string, now can be ``boolean``
-  (True/False), ``integer``, ``string`` and ``list``, so if your program
-  plays with config, you have to modify code a bit.
-* Fixed Speller method.
-* `test.py`__ --- simple test script
-
-__ src/test.py
+__ http://docs.python.org/library/ctypes.html
+__ http://aspell.net
+__ http://code.activestate.com/recipes/117221/
 
 
+License
+=======
+
+Both libraries are licensed under BSD license
 
 
-Download
-------------------------------------------------------------------------
-
-* `aspell-python1.12.tar.gz`_ --- **latest version**, described in this document
-* `aspell-python1.11.tar.gz`_
-* `aspell-python-1.0.win32-py2.4.exe`_, `aspell-python-1.11.win32-py2.4.exe`_
-  --- precompiled binary files for Microsoft Windows (outdated!)
-
-* `browse sources`__
-
-__ src/
-
-.. _aspell-python1.12.tar.gz: 			download/aspell-python1.12.tar.gz
-.. _aspell-python1.11.tar.gz: 			download/aspell-python1.11.tar.gz
-.. _aspell-python-1.0.win32-py2.4.exe:	download/aspell-python-1.0.win32-py2.4.exe
-.. _aspell-python-1.11.win32-py2.4.exe:	download/aspell-python-1.11.win32-py2.4.exe
-
-Copyrights
-------------------------------------------------------------------------
-
-Module is covered by BSD_ license.  Author tried to make code usable
-and free of errors, but can't give any guarantees and is not responsible
-for any damages in your software, hardware or anything else.
+Author
+======
 
 Wojciech Muła, wojciech_mula@poczta.onet.pl
 
+Thanks to:
+
+* **Adam Karpierz** for conviencing me to change license from GPL to BSD
+  and for compiling early versions of C extension under Windows
+
+* **Gora Mohanty** for reporting a bug.
+
 
 Installation
-------------------------------------------------------------------------
+============
 
-First extract the sources::
+To build & install module for python2.x please use script setup.2.py, i.e.::
 
-	$ tar -xzf aspell-python[some-number].tar.gz
-	$ cd aspell-python
+	$ python setup.2.py build
+	$ python setup.2.py install
+
+Module for python3.x is build with setup.py::
+
+	$ python setup.py build
+	$ python setup.py install
+
+
+Details
+-------
 
 You need to have libaspell headers installed, Debian package is called
 ``libaspell-dev``, other distributions should have similar package.
@@ -109,8 +89,9 @@ Change to this directory and when you will run python it will be able to
 import module (you may also copy aspell.so wherever you want, and there
 run python).
 
-Documentation
-------------------------------------------------------------------------
+
+API
+===
 
 **Aspell-python** module is seen in python under name ``aspell``. So,
 **aspell-python** module is imported in following way::
@@ -122,13 +103,13 @@ of exceptions --- all described below.
 
 
 Methods
-~~~~~~~
+-------
 
 
 .. _ConfigKeysMeth:
 
 ConfigKeys() => dictionary
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Method returns a dictionary, where keys are names of configuration
 item, values are 3-tuples:
@@ -168,10 +149,10 @@ output of ``ConfigKeys``).
 
 
 Classes
-~~~~~~~
+-------
 
 _`Speller`\ ()
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 Method creates an AspellSpeller_ object which is an interface to the GNU
 Aspell.
@@ -190,7 +171,7 @@ of pairs to the Speller().
 
 
 Exceptions
-~~~~~~~~~~
+----------
 
 Module defines following errors:
 
@@ -202,7 +183,7 @@ Additionally ``TypeError`` is raised when you pass wrong parameters to
 method.
 
 _`AspellConfigError`
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 Error is reported by methods Speller_ and ConfigKeys_. The most common
 error is passing unknown key.
@@ -215,13 +196,13 @@ aspell.AspellConfigError: The key "python" is unknown.
 
 
 _`AspellModuleError`
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 Error is reported when module can't allocate aspell structures.
 
 
 _`AspellSpellerError`
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 
 Error is reported by ``libaspell``.
@@ -234,7 +215,7 @@ aspell.AspellSpellerError: The file "/home/dictionary.rws" can not be opened for
 >>>
 
 _`AspellSpeller` Object
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 The AspellSpeller object provides interface to the aspell. It has
 several methods, described below.
@@ -262,7 +243,7 @@ earlier:
 
 
 _`ConfigKeys`\ () => dictionary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **New in version 1.1, changed in 1.13.**
 
@@ -272,7 +253,7 @@ Result has the same meaning as ``ConfigKeys()`` procedure.
 
 
 _`check`\ (word) => boolean
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Method checks spelling of given ``word``. If ``word`` is present in
 the main or personal (see addtoPersonal_) or session dictionary
@@ -297,7 +278,7 @@ False
 
 
 _`suggest` (word) => list of suggestions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Method returns a list of suggested spellings for given word.  Even if
 word is correct, i.e. method check_ returned 1, action is performed.
@@ -312,7 +293,7 @@ times with the same argument.
 
 
 _`addReplecement`\ (incorrect, correct) => None
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adds a replacement pair, it affects order of words in suggest_ result.
 
@@ -328,7 +309,7 @@ the replacement pairs to file ``~/.aspell.{lang_code}.prepl``.
 
 
 _`addtoPersonal`\ (word) => None
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adds word to the personal dictionary, which is stored in file
 ``~./.aspell.{lang_code}.pws``. The added words are available for
@@ -392,7 +373,7 @@ is called.
 
 
 _`addtoSession`\ (word) => None
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adds word to the session dictionary. The session dictionary is
 volatile, it is not saved to any file. It is destroyed with
@@ -400,13 +381,13 @@ AspellSpeller_ object or when method clearSession_ is called.
 
 
 _`saveAllwords`\ () => None
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Save all words from personal dictionary.
 
 
 _`clearSession`\ () => None
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clears session dictionary.
 
@@ -422,12 +403,12 @@ Clears session dictionary.
 0
 
 _`getPersonalwordlist`\ () => [list of strings]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Returns list of words from personal dictionary.
 
 _`getSessionwordlist`\ () => [list of strings]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Returns list of words from session dictionary.
 
@@ -442,13 +423,13 @@ Returns list of words from session dictionary.
 
 
 _`getMainwordlist`\ () => [list of strings]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Returns list of words from the main dictionary.
 
 
 Known problems
-~~~~~~~~~~~~~~
+==============
 
 All version of aspell I've tested have the same error - calling method
 getMainwordlist_ produces ``SIGKILL``. It is aspell problem and if you
@@ -524,7 +505,7 @@ really need a full list of words, use external program
 	  - **SIGKILL**
 
 Character encoding
-------------------
+==================
 
 Aspell uses 8-bit encoding. The encoding depend on dictionary setting and 
 is stored in key ``encoding``. One can obtain this key using speller's
@@ -549,6 +530,7 @@ needed. Here is a sample session (polish dictionary is used).
 >>> s.check( unicode(word, 'utf-8').encode(enc) )
 1
 
+Major updates
+=============
 
-..
-	vim: tw=72 ts=4 sw=4
+* 2011-03-06: version for Python 3.x
