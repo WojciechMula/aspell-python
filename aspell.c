@@ -458,7 +458,7 @@ static PyObject* m_check(PyObject* self, PyObject* args) {
 /* method:suggest ************************************************************/
 static PyObject* m_suggest(PyObject* self, PyObject* args) {
 	char* word;
-	int   length;
+	Py_ssize_t length;
 	PyObject* buf;
 	PyObject* list;
 
@@ -506,7 +506,7 @@ static PyObject* AspellCheckError(PyObject* self) {
 /* method:addtoPersonal *******************************************************/
 static PyObject* m_addtoPersonal(PyObject* self, PyObject* args) {
 	char *word;
-	int   length;
+	Py_ssize_t length;
 
 	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
 		PyErr_SetString(PyExc_TypeError, "a string is required");
@@ -520,7 +520,7 @@ static PyObject* m_addtoPersonal(PyObject* self, PyObject* args) {
 /* method:addtoSession ********************************************************/
 static PyObject* m_addtoSession(PyObject* self, PyObject* args) {
 	char *word;
-	int   length;
+	Py_ssize_t length;
 	PyObject* buf;
 
 	buf = get_arg_string(self, args, 0, &word, &length);
@@ -548,8 +548,8 @@ static PyObject* m_saveallwords(PyObject* self, PyObject* args) {
 
 /* method:addReplacement ******************************************************/
 static PyObject* m_addReplacement(PyObject* self, PyObject* args) {
-	char *mis; int ml;
-	char *cor; int cl;
+	char *mis; Py_ssize_t ml;
+	char *cor; Py_ssize_t cl;
 	PyObject* Mbuf;
 	PyObject* Cbuf;
 
@@ -731,13 +731,10 @@ static PyModuleDef aspellmodule = {
 PyMODINIT_FUNC
 PyInit_aspell(void) {
 	PyObject *module;
-	PyObject *dict;
 
 	module = PyModule_Create(&aspellmodule);
 	if (module == NULL)
 		return NULL;
-
-	dict = PyModule_GetDict(module);
 
 	speller_as_sequence.sq_contains = m_contains;
 	aspell_AspellType.tp_as_sequence = &speller_as_sequence;
