@@ -223,7 +223,7 @@ several methods, described below.
 * ConfigKeys_
 * check_
 * suggest_
-* addReplecement_
+* addReplacement_
 * addtoPersonal_
 * saveAllwords_
 * addtoSession_
@@ -292,13 +292,13 @@ recommend caching it's results if program calls the function several
 times with the same argument.
 
 
-_`addReplecement`\ (incorrect, correct) => None
+_`addReplacement`\ (incorrect, correct) => None
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adds a replacement pair, it affects order of words in suggest_ result.
 
 >>> # we choose 7th word from previous result
->>> s.addReplecement('wrod', 'trod')
+>>> s.addReplacement('wrod', 'trod')
 
 >>> # and the selected word appears at the 1st position
 >>> s.suggest('word')
@@ -464,7 +464,7 @@ really need a full list of words, use external program
 	  - ok
 	  - ok
 
-	* - addReplecement_
+	* - addReplacement_
 	  - ok
 	  - ok
 	  - ok
