@@ -79,15 +79,9 @@ If you are, type following command::
 It builds package and installs ``aspell.so`` in directory
 ``/usr/lib/{python}/site-packages``.
 
-If you don't have root login, you can build package locally.
-Type following command::
-
-	$ python setup.py build
-
-It builds package and places aspell.so in ``build/lib.{something}``.
-Change to this directory and when you will run python it will be able to
-import module (you may also copy aspell.so wherever you want, and there
-run python).
+If you don't have root login, you can append ``--user`` to the install
+command, to install it for the current user in
+``~/.local/lib/{python}/site-packages``.
 
 
 API
