@@ -2,7 +2,7 @@
 
 set -e
 
-options="--format=bztar --metadata-check update"
+options="--format=bztar --metadata-check upload"
 pydist="python setup.py sdist $options"
 
 function py3() {
