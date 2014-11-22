@@ -258,6 +258,13 @@ static PyObject* configkeys(PyObject* _) {
 				obj = AspellStringList2PythonList(lst);
 				delete_aspell_string_list(lst);
 				break;
+			default:
+				obj = NULL;
+				break;
+		}
+
+		if (obj == NULL) {
+			continue;
 		}
 
 		if (PyList_Append(key_list, Py_BuildValue("(ssOs)", key_info->name, key_type, obj, key_info->desc ? key_info->desc : "internal")) == -1) {
@@ -340,6 +347,13 @@ static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 				obj = AspellStringList2PythonList(lst);
 				delete_aspell_string_list(lst);
 				break;
+			default:
+				obj = NULL;
+				break;
+		}
+
+		if (obj == NULL) {
+			continue;
 		}
 
 		if (PyList_Append(key_list, Py_BuildValue("(ssO)", key_info->name, key_type, obj)) == -1) {
