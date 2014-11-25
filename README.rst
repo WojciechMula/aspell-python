@@ -25,7 +25,7 @@ and other with Python 3.x.
 
 Version for Py2 has been tested with Python 2.1, Python 2.3.4
 and Python 2.4.1. Probably it works fine with all Python versions
-not older then 2.0. Version for Py3 has been tested with Python 3.2.
+not older than 2.0. Version for Py3 has been tested with Python 3.2.
 
 __ http://docs.python.org/library/ctypes.html
 __ http://aspell.net
@@ -59,10 +59,10 @@ To build & install module for python2.x please use script setup.2.py, i.e.::
 	$ python setup.2.py build
 	$ python setup.2.py install
 
-Module for python3.x is build with setup.py::
+Module for python3.x is build with setup.3.py::
 
-	$ python setup.py build
-	$ python setup.py install
+	$ python setup.3.py build
+	$ python setup.3.py install
 
 
 Details
@@ -505,7 +505,7 @@ Aspell uses 8-bit encoding. The encoding depend on dictionary setting and
 is stored in key ``encoding``. One can obtain this key using speller's
 ConfigKeys_.
 
-If your application uses other encoding then aspell, the translation is
+If your application uses other encoding than aspell, the translation is
 needed. Here is a sample session (polish dictionary is used).
 
 >>> import aspell
@@ -524,7 +524,3 @@ needed. Here is a sample session (polish dictionary is used).
 >>> s.check( unicode(word, 'utf-8').encode(enc) )
 1
 
-Major updates
-=============
-
-* 2011-03-06: version for Python 3.x
