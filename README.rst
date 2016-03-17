@@ -84,6 +84,16 @@ command, to install it for the current user in
 ``~/.local/lib/{python}/site-packages``.
 
 
+Windows issues
+--------------
+
+To correctly install aspell's dictionaries in Windows some additional
+work is needed. `Eric Woudenberg`__ has prepared detailed step-by-step
+instruction avaiable in file `windows.rst <windows.rst>`_.
+
+__ http://www.woudy.org/
+
+
 API
 ===
 

@@ -4,6 +4,7 @@
 
 :Author: **Eric Woudenberg** <eaw(at)woudy(dot)org>
 :Date:   2015-08-29
+:Updated: 2016-03-17
 
 .. contents::
 
@@ -52,7 +53,7 @@ The solution
 
 3) Run the dictionary's "make" and "make install" scripts::
 
-    $ ./make
+    $ make
     /usr/bin/prezip-bin -d < en-common.cwl | /usr/bin/aspell --lang=en create master ./en-common.rws
     /usr/bin/prezip-bin -d < en-variant_0.cwl | /usr/bin/aspell --lang=en create master ./en-variant_0.rws
     /usr/bin/prezip-bin -d < en-variant_1.cwl | /usr/bin/aspell --lang=en create master ./en-variant_1.rws
@@ -72,7 +73,7 @@ The solution
     /usr/bin/prezip-bin -d < en_US-w_accents-only.cwl | /usr/bin/aspell --lang=en create master ./en_US-w_accents-only.rws
     /usr/bin/prezip-bin -d < en_US-wo_accents-only.cwl | /usr/bin/aspell --lang=en create master ./en_US-wo_accents-only.rws 
     
-    $ ./make install
+    $ make install
     mkdir -p /usr/lib/aspell-0.60/
     cp en-common.rws en-variant_0.rws en-variant_1.rws en-variant_2.rws 
     en-w_accents-only.rws en-wo_accents-only.rws en_CA-variant_0.rws 
