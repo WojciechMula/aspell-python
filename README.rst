@@ -61,8 +61,11 @@ To build & install module for python2.x please use script setup.2.py, i.e.::
 
 Module for python3.x is build with setup.3.py::
 
-	$ python setup.3.py build
-	$ python setup.3.py install
+	$ python3 setup.3.py build
+	$ python3 setup.3.py install
+
+Note ``python3`` name. Many Linux distributions ship both Python 2 and 3,
+and use the different name to distinguish versions.
 
 
 Details
