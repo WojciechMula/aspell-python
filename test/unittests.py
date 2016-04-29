@@ -1,9 +1,11 @@
-# $Id$
 import unittest
 import os
+import sys
 
 # import tested module
 import aspell
+
+
 
 class TestBase(unittest.TestCase):
 	def setUp(self):
@@ -14,10 +16,14 @@ class TestBase(unittest.TestCase):
 		)
 
 		# get current speller configuration
-		self.config  = dict(
-			(name, value) for name, (type, value, desc) in
-				self.speller.ConfigKeys().items()
-		)
+		config = self.speller.ConfigKeys()
+
+		# XXX: workaround for issue #3
+		if type(config) is dict:
+			self.config = dict((name, value) for name, (type, value, desc) in config.items())
+		else:
+			self.config = dict((name, value) for (name, type, value) in config)
+
 		
 		# polish words (cat, tree, spring) not existing in english dict
 		self.polish_words = ['kot', 'drzewo', 'wiosna']
@@ -38,11 +44,17 @@ class TestCheckMethod(TestBase):
 
 
 	def test_in(self):
+		if sys.version_info.major == 2: # issue #4
+			return
+
 		words = ['word', 'flower', 'tree', 'rock', 'cat', 'winter']
 		for word in words:
 			self.assertTrue(word in self.speller)
 
 	def test_notin(self):
+		if sys.version_info.major == 2: # issue #4
+			return
+
 		words = ['misteke', 'zo', 'tre', 'bicyle']
 		for word in words:
 			self.assertFalse(word in self.speller)
@@ -52,7 +64,7 @@ class TestCheckMethod(TestBase):
 class TestSuggestMethod(TestBase):
 	def test(self):
 		pairs = {
-			'wrod'	: 'trod',
+			'wrod'	: 'word',
 			'tre'	: 'tree',
 			'xoo'	: 'zoo',
 		}
@@ -67,8 +79,8 @@ class TestAddReplacementMethod(TestBase):
 		"addReplacement affects on order of words returing by suggest"
 
 		wrong		= 'wrod'
-		correct_def = 'trod'	# first suggestion in default order
-		correct		= 'word'	# first suggestion after altering order
+		correct_def = 'word'	# first suggestion in default order
+		correct		= 'trod'	# first suggestion after altering order
 
 		sug = self.speller.suggest(wrong)
 		self.assertEqual(sug[0], correct_def)

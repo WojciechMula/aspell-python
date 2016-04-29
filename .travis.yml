@@ -1,0 +1,18 @@
+language: c
+addons:
+    apt:
+        packages:
+        - python3
+        - python3-dev
+        - aspell
+        - aspell-en
+        - libaspell-dev
+
+matrix:
+  include:
+    - compiler: gcc
+    - compiler: clang
+
+script:
+  - make
+

@@ -2,6 +2,9 @@
               aspell-python - Python bindings for GNU aspell
 ========================================================================
 
+.. image:: https://travis-ci.org/WojciechMula/aspell-python.svg?branch=master
+    :target: https://travis-ci.org/WojciechMula/aspell-python
+
 .. contents::
 
 

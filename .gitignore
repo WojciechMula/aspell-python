@@ -2,3 +2,5 @@ setup.py
 MANIFEST
 dist
 build
+*.so
+*.pyc
