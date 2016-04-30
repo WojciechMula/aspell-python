@@ -3,8 +3,11 @@ import os
 import sys
 
 # import tested module
-import aspell
-
+arg = '--ctypes-module'
+if arg in sys.argv:
+	import pyaspell as aspell 
+else:
+	import aspell
 
 
 class TestBase(unittest.TestCase):
@@ -217,6 +220,15 @@ class TestSetConfigKey(unittest.TestCase):
 		self.speller = aspell.Speller(('lang', 'en'))
 
 
+	def get_config(self):
+		config = self.speller.ConfigKeys();
+		# XXX: workaround for issue #3
+		if type(config) is dict:
+			return dict((name, value) for name, (type, value, desc) in config.items())
+		else:
+			return dict((name, value) for (name, type, value) in config)
+
+
 	def test_string_value(self):
 		
 		self.speller.setConfigKey('sug-mode', "normal");
@@ -231,25 +243,30 @@ class TestSetConfigKey(unittest.TestCase):
 		key  = 'clean-affixes'
 
 		self.speller.setConfigKey(key, True)
-		self.assertEqual(self.speller.ConfigKeys()[key][1], True)
+		self.assertEqual(self.get_config()[key], True)
 		self.speller.setConfigKey(key, False)
-		self.assertEqual(self.speller.ConfigKeys()[key][1], False)
+		self.assertEqual(self.get_config()[key], False)
 
 
 	def test_int_value(self):
 		key   = 'run-together-min'
 		value = 123
 		self.speller.setConfigKey(key, value)
-		self.assertEqual(self.speller.ConfigKeys()[key][1], value)
+		self.assertEqual(self.get_config()[key], value)
 
 	@unittest.skip("not implemented")
 	def test_list_value(self):
 		key   = 'filter'
 		value = ['foo', 'bar', 'baz']
 		self.speller.setConfigKey(key, value)
-		self.assertEqual(self.speller.ConfigKeys()[key][1], value)
+		self.assertEqual(self.get_config()[key], value)
 
 if __name__ == '__main__':
+	try:
+		del sys.argv[sys.argv.index(arg)]
+	except:
+		pass
+
 	unittest.main()
 
 # vim: ts=4 sw=4 nowrap

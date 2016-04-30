@@ -373,6 +373,81 @@ config_get_error:
 	return NULL;
 }
 
+/* method:setConfigKey ********************************************************/
+static PyObject* m_set_config_key(PyObject* self, PyObject* args) {
+	AspellConfig* config;
+	const AspellKeyInfo* info;
+	char* key;
+	char* string;
+	long  number;
+	char  buffer[32];
+
+	PyObject* arg1;
+
+	if (PyTuple_Size(args) != 2) {
+		PyErr_Format(PyExc_TypeError, "expected two arguments");
+		return NULL;
+	}
+
+	if (!PyArg_ParseTuple(args, "sO", &key, &arg1)) {
+		PyErr_Format(PyExc_TypeError, "first argument must be a string");
+		return NULL;
+	}
+
+
+	config = aspell_speller_config(Speller(self));
+	info   = aspell_config_keyinfo(config, key);
+	if (aspell_config_error(config) != 0) {
+		PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
+		return NULL;
+	}
+
+	switch (info->type) {
+		case AspellKeyInfoList:
+			// Can't figure out the splitting char for lists,
+			// it seems to be the ':', but doesn't work.
+		case AspellKeyInfoString:
+			string = PyString_AsString(arg1);
+			if (string == NULL) {
+				PyErr_Format(PyExc_TypeError, "second argument have to be string");
+				return NULL;
+			}
+
+			aspell_config_replace(config, key, string);
+			break;
+
+		case AspellKeyInfoInt:
+			number = PyLong_AsLong(arg1);
+			if (number == -1 && PyErr_Occurred()) {
+				return NULL;
+			}
+
+			snprintf(buffer, 32, "%ld", number);
+			aspell_config_replace(config, key, buffer);
+			break;
+
+		case AspellKeyInfoBool:
+			if (PyBool_Check(arg1)) {
+				aspell_config_replace(config, key, (arg1 == Py_True) ? "true" : "false");
+			} else {
+				PyErr_Format(PyExc_TypeError, "second argument have to be boolean");
+				return NULL;
+			}
+			break;
+
+		default:
+			PyErr_Format(_AspellModuleException, "unsupported aspell config item type");
+			return NULL;
+	}
+
+	if (aspell_config_error(config) != 0) {
+		PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
+		return NULL;
+	}
+
+	Py_RETURN_NONE;
+}
+
 /* method:check ***************************************************************/
 static PyObject* m_check(PyObject* self, PyObject* args) {
 	char* word;
@@ -509,6 +584,13 @@ static PyMethodDef aspell_object_methods[] = {
 		"\t1. key name\n"
 		"\t2. key type={string|integer|boolean|list}\n"
 		"\t4. current value"
+	},
+	{
+		"setConfigKey",
+		(PyCFunction)m_set_config_key,
+		METH_VARARGS,
+		"changeConfig(key, value)\n"
+		"Sets a new config value for given key"
 	},
 	{
 		"check",
