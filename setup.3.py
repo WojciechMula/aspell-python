@@ -8,10 +8,10 @@ module = Extension('aspell',
 )
 
 setup (name = 'aspell-python-py3',
-    version = '1.13',
+    version = '1.14',
     ext_modules = [module],
 
-    description      = "Wrapper around GNU Aspell for python 3",
+    description      = "Wrapper around GNU Aspell for Python 3",
     author           = "Wojciech Muła",
     author_email     = "wojciech_mula@poczta.onet.pl",
     maintainer       = "Wojciech Muła",
