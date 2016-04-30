@@ -386,27 +386,45 @@ static PyObject* m_set_config_key(PyObject* self, PyObject* args) {
 }
 
 /* method:check ***************************************************************/
-static PyObject* m_check(PyObject* self, PyObject* args) {
+static int m_contains(PyObject* self, PyObject* args) {
 	char* word;
-	int   length;
+	Py_ssize_t length;
 
-	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
-		PyErr_SetString(PyExc_TypeError, "a string is required");
-		return NULL;
+	if (PyTuple_Check(args)) {
+		if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
+			PyErr_SetString(PyExc_TypeError, "a string is required");
+			return -1;
+		}
+	} else {
+		if (PyString_AsStringAndSize(args, &word, &length)) {
+			return -1;
+		}
 	}
 
-	if (!length)
-		return Py_BuildValue("i", 1);
+	if (!length) {
+		return 1;
+	}
 
 	switch (aspell_speller_check(Speller(self), word, length)) {
 		case 0:
-			return Py_BuildValue("i", 0);
+			return 0;
 		case 1:
-			return Py_BuildValue("i", 1);
+			return 1;
 		default:
 			PyErr_SetString(_AspellSpellerException, aspell_speller_error_message(Speller(self)));
-			return NULL;
+			return -1;
 	}
+}
+
+/* method:check ***************************************************************/
+static PyObject* m_check(PyObject* self, PyObject* args) {
+
+	const int ret = m_contains(self, args);
+	if (ret < 0) {
+		return NULL;
+	}
+
+	return Py_BuildValue("i", ret);
 }
 
 /* method:suggest ************************************************************/
@@ -610,17 +628,20 @@ static PyObject* speller_getattr(PyObject *obj, char *name) {
 	return Py_FindMethod(aspell_object_methods, obj, name);
 }
 
-static PyTypeObject aspell_AspellType = {
-	PyObject_HEAD_INIT(NULL)
-	0,
-	"AspellSpeller",
-	sizeof(aspell_AspellObject),
-	0,
 
-	speller_dealloc,
-	0,
-	speller_getattr
+static PySequenceMethods sequence_methods = {
+	0,                          /* sq_length */
+	0,                          /* sq_concat */
+	0,                          /* sq_repeat */
+	0,                          /* sq_item */
+	0,                          /* sq_slice */
+	0,                          /* sq_ass_item */
+	0,                          /* sq_ass_slice */
+	m_contains,                 /* sq_contains */
+	0,                          /* sq_inplace_concat */
+	0,                          /* sq_inplace_repeat */
 };
+
 
 static PyMethodDef aspell_methods[] = {
 	{
@@ -640,6 +661,51 @@ static PyMethodDef aspell_methods[] = {
 		"\t3. description (if 'internal' no description available)"
 	},
 	{NULL, NULL, 0, NULL}
+};
+
+
+
+static PyTypeObject aspell_AspellType = {
+    PyObject_HEAD_INIT(&PyType_Type)
+    0,                                          /* ob_size */
+    "AspellSpeller",                            /* tp_name */
+    sizeof(aspell_AspellObject),                /* tp_basicsize */
+    0,                                          /* tp_itemsize */
+    speller_dealloc,                            /* tp_dealloc */
+    0,                                          /* tp_print */
+    speller_getattr,                            /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
+    0,                                          /* tp_repr */
+    0,                                          /* tp_as_number */
+    &sequence_methods,                          /* tp_as_sequence */
+    0,                                          /* tp_as_mapping */
+    0,                                          /* tp_hash */
+    0,                                          /* tp_call */
+    0,                                          /* tp_str */
+    0,                                          /* tp_getattro */
+    0,                                          /* tp_setattro */
+    0,                                          /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                         /* tp_flags */
+    0,                                          /* tp_doc */
+    0,                                          /* tp_traverse */
+    0,                                          /* tp_clear */
+    0,                                          /* tp_richcompare */
+    0,                                          /* tp_weaklistoffset */
+    0,                                          /* tp_iter */
+    0,                                          /* tp_iternext */
+    aspell_methods,                             /* tp_methods */
+    0,                                          /* tp_members */
+    0,                                          /* tp_getset */
+    0,                                          /* tp_base */
+    0,                                          /* tp_dict */
+    0,                                          /* tp_descr_get */
+    0,                                          /* tp_descr_set */
+    0,                                          /* tp_dictoffset */
+    0,                                          /* tp_init */
+    0,                                          /* tp_alloc */
+    0,                                          /* tp_new */
+    0,                                          /* tp_free */
 };
 
 DL_EXPORT(void)

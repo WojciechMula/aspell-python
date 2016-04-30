@@ -42,17 +42,11 @@ class TestCheckMethod(TestBase):
 
 
 	def test_in(self):
-		if sys.version_info.major == 2: # issue #4
-			return
-
 		words = ['word', 'flower', 'tree', 'rock', 'cat', 'winter']
 		for word in words:
 			self.assertTrue(word in self.speller)
 
 	def test_notin(self):
-		if sys.version_info.major == 2: # issue #4
-			return
-
 		words = ['misteke', 'zo', 'tre', 'bicyle']
 		for word in words:
 			self.assertFalse(word in self.speller)
@@ -260,4 +254,4 @@ if __name__ == '__main__':
 
 	unittest.main()
 
-# vim: ts=4 sw=4 nowrap
+# vim: ts=4 sw=4 nowrap noexpandtab
