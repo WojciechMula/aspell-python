@@ -262,6 +262,19 @@ Method returns current configuration of speller.
 Result has the same meaning as ``ConfigKeys()`` procedure.
 
 
+_`setConfigKey`\ (key, value)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**New in version 1.14**
+
+Method alters configuration value. Note that depending on key's type value
+is expected to be: string, boolean or integer.
+
+Although setting all keys is possible, changes to some of them have no
+effect. For example changing **lang** doesn't change current language,
+it's an aspell limitation (feature).
+
+
 _`check`\ (word) => boolean
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

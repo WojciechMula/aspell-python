@@ -212,6 +212,43 @@ class TestPersonalwordlist(TestBase):
 		self._clear_personal()
 
 
+class TestSetConfigKey(unittest.TestCase):
+	def setUp(self):
+		self.speller = aspell.Speller(('lang', 'en'))
+
+
+	def test_string_value(self):
+		
+		self.speller.setConfigKey('sug-mode', "normal");
+		sug1 = self.speller.suggest('rutter')
+		self.speller.setConfigKey('sug-mode', "bad-spellers");
+		sug2 = self.speller.suggest('rutter')
+
+		self.assertTrue(sug1 != sug2)
+
+
+	def test_bool_value(self):
+		key  = 'clean-affixes'
+
+		self.speller.setConfigKey(key, True)
+		self.assertEqual(self.speller.ConfigKeys()[key][1], True)
+		self.speller.setConfigKey(key, False)
+		self.assertEqual(self.speller.ConfigKeys()[key][1], False)
+
+
+	def test_int_value(self):
+		key   = 'run-together-min'
+		value = 123
+		self.speller.setConfigKey(key, value)
+		self.assertEqual(self.speller.ConfigKeys()[key][1], value)
+
+	@unittest.skip("not implemented")
+	def test_list_value(self):
+		key   = 'filter'
+		value = ['foo', 'bar', 'baz']
+		self.speller.setConfigKey(key, value)
+		self.assertEqual(self.speller.ConfigKeys()[key][1], value)
+
 if __name__ == '__main__':
 	unittest.main()
 

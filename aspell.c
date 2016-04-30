@@ -7,7 +7,7 @@
 
         Released under BSD license
 
-        Wojciech Mu³a
+        Wojciech MuÅ‚a
         wojciech_mula@poczta.onet.pl
 
  History:
@@ -134,6 +134,14 @@ static PyObject* AspellStringList2PythonList(const AspellStringList* wordlist) {
 	delete_aspell_string_enumeration(elements);
 	return list;
 }
+
+
+static PyObject* get_single_arg_string(
+	PyObject* self,	// [in]
+	PyObject* obj,	// [in]
+	char** word,		// [out]
+	Py_ssize_t* size	// [out]
+);
 
 /* Create a new speller *******************************************************/
 static PyObject* new_speller(PyTypeObject* self, PyObject* args, PyObject* kwargs) {
@@ -340,7 +348,6 @@ python_error:
 	return NULL;
 }
 
-
 /* ConfigKeys *****************************************************************/
 static PyObject* configkeys(PyObject* _) {
 	return configkeys_helper(NULL);
@@ -349,6 +356,84 @@ static PyObject* configkeys(PyObject* _) {
 /* method:ConfigKeys **********************************************************/
 static PyObject* m_configkeys(PyObject* self, PyObject* args) {
 	return configkeys_helper(self);
+}
+
+/* method:setConfigKey ********************************************************/
+static PyObject* m_set_config_key(PyObject* self, PyObject* args) {
+	AspellConfig* config;
+	const AspellKeyInfo* info;
+	char* key;
+	char* string;
+	Py_ssize_t length;
+	long  number;
+	char  buffer[32];
+
+	PyObject* arg1;
+	PyObject* value;
+
+	if (PyTuple_Size(args) != 2) {
+		PyErr_Format(PyExc_TypeError, "expected two arguments");
+		return NULL;
+	}
+
+	if (!PyArg_ParseTuple(args, "sO", &key, &arg1)) {
+		PyErr_Format(PyExc_TypeError, "first argument must be a string");
+		return NULL;
+	}
+
+
+	config = aspell_speller_config(Speller(self));
+	info   = aspell_config_keyinfo(config, key);
+	if (aspell_config_error(config) != 0) {
+		PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
+		return NULL;
+	}
+
+	switch (info->type) {
+		case AspellKeyInfoList:
+			// Can't figure out the splitting char for lists,
+			// it seems to be the ':', but doesn't work.
+		case AspellKeyInfoString:
+			value = get_single_arg_string(self, arg1, &string, &length);
+			if (value == NULL) {
+				PyErr_Format(PyExc_TypeError, "second argument have to be string");
+				return NULL;
+			}
+
+			aspell_config_replace(config, key, string);
+			Py_DECREF(value);
+			break;
+
+		case AspellKeyInfoInt:
+			number = PyLong_AsLong(arg1);
+			if (number == -1 && PyErr_Occurred()) {
+				return NULL;
+			}
+
+			snprintf(buffer, 32, "%ld", number);
+			aspell_config_replace(config, key, buffer);
+			break;
+
+		case AspellKeyInfoBool:
+			if (PyBool_Check(arg1)) {
+				aspell_config_replace(config, key, (arg1 == Py_True) ? "true" : "false");
+			} else {
+				PyErr_Format(PyExc_TypeError, "second argument have to be boolean");
+				return NULL;
+			}
+			break;
+
+		default:
+			PyErr_Format(_AspellModuleException, "unsupported aspell config item type");
+			return NULL;
+	}
+
+	if (aspell_config_error(config) != 0) {
+		PyErr_SetString(_AspellConfigException, aspell_config_error_message(config));
+		return NULL;
+	}
+
+	Py_RETURN_NONE;
 }
 
 
@@ -583,6 +668,13 @@ static PyMethodDef aspell_object_methods[] = {
 		"\t1. key name\n"
 		"\t2. key type={string|integer|boolean|list}\n"
 		"\t4. current value"
+	},
+	{
+		"setConfigKey",
+		(PyCFunction)m_set_config_key,
+		METH_VARARGS,
+		"changeConfig(key, value)\n"
+		"Sets a new config value for given key"
 	},
 	{
 		"check",
