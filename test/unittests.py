@@ -21,12 +21,7 @@ class TestBase(unittest.TestCase):
 		# get current speller configuration
 		config = self.speller.ConfigKeys()
 
-		# XXX: workaround for issue #3
-		if type(config) is dict:
-			self.config = dict((name, value) for name, (type, value, desc) in config.items())
-		else:
-			self.config = dict((name, value) for (name, type, value) in config)
-
+		self.config = dict((name, value) for name, (type, value, desc) in config.items())
 		
 		# polish words (cat, tree, spring) not existing in english dict
 		self.polish_words = ['kot', 'drzewo', 'wiosna']
@@ -222,11 +217,7 @@ class TestSetConfigKey(unittest.TestCase):
 
 	def get_config(self):
 		config = self.speller.ConfigKeys();
-		# XXX: workaround for issue #3
-		if type(config) is dict:
-			return dict((name, value) for name, (type, value, desc) in config.items())
-		else:
-			return dict((name, value) for (name, type, value) in config)
+		return dict((name, value) for name, (type, value, desc) in config.items())
 
 
 	def test_string_value(self):

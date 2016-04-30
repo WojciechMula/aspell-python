@@ -663,11 +663,11 @@ static PyMethodDef aspell_object_methods[] = {
 		"ConfigKeys",
 		(PyCFunction)m_configkeys,
 		METH_VARARGS,
-		"ConfigKeys() => list of config keys\n"
-		"The list's item is a 3-touple:\n"
-		"\t1. key name\n"
-		"\t2. key type={string|integer|boolean|list}\n"
-		"\t4. current value"
+		"ConfigKeys() => dictionary of config keys\n"
+        "Keys are string, values are 3-touple:\n"
+		"\t1. key type={string|integer|boolean|list}\n"
+		"\t2. current value\n"
+		"\t3. description (if 'internal' no description available)"
 	},
 	{
 		"setConfigKey",
@@ -802,12 +802,11 @@ static PyMethodDef aspell_module_methods[] = {
 		"ConfigKeys",
 		(PyCFunction)configkeys,
 		METH_VARARGS,
-		"ConfigKeys() => list of config keys\n"
-		"The list's item is a 4-touple:\n"
-		"\t1. key name\n"
-		"\t2. key type={string|integer|boolean|list}\n"
-		"\t3. default value\n"
-		"\t4. short description ('internal' for undocumented options)."
+		"ConfigKeys() => dictionary of config keys\n"
+        "Keys are string, values are 3-touple:\n"
+		"\t1. key type={string|integer|boolean|list}\n"
+		"\t2. current value\n"
+		"\t3. description (if 'internal' no description available)"
 	},
 	{NULL, NULL, 0, NULL}
 };
