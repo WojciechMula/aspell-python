@@ -16,7 +16,7 @@ module = Extension('aspell',
 )
 
 setup (name = 'aspell-python-py2',
-	version = '1.14',
+	version = '1.15',
 	ext_modules = [module],
 
 	description      = "Wrapper around GNU Aspell for Python 2",
