@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup, Extension
 
+def get_include_dirs():
+    import sys
+    if sys.platform.startswith('darwin'):
+        return ['/opt/local/include'] # dir used by MacPorts
+    else:
+        return []
+
 module = Extension('aspell',
 	libraries = ['aspell'],
 	library_dirs = ['/usr/local/lib/'],
+    include_dirs = get_include_dirs(),
 	sources = ['aspell.2.c']
 )
 
