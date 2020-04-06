@@ -541,10 +541,10 @@ needed. Here is a sample session (polish dictionary is used).
 >>> s=aspell.Speller('lang', 'pl')
 >>> 
 >>> s.ConfigKeys()['encoding']
-[('encoding', 'string', 'iso8859-2')]
->>> enc =s.ConfigKeys()['encoding'][2]
+('string', u'iso-8859-1', 'encoding to expect data to be in')
+>>> enc =s.ConfigKeys()['encoding'][1]
 >>> enc  # dictionary encoding
-'iso8859-2'
+'iso-8859-1'
 >>> word # encoding of word is utf8
 # 'gżegżółka' means in some polish dialects 'cuckoo'
 'g\xc5\xbceg\xc5\xbc\xc3\xb3\xc5\x82ka'
