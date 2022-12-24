@@ -99,9 +99,12 @@ static PyObject* AspellWordList2PythonList(PyObject* self, const AspellWordList*
 			return NULL;
 		}
 
-		if (PyList_Append(list, elem) == -1) {
+        // Mem leak solved
+        int result = PyList_Append(list, elem);
+        Py_DECREF(elem);
+
+		if (result == -1) {
 			delete_aspell_string_enumeration(elements);
-			Py_DECREF(elem);
 			Py_DECREF(list);
 			return NULL;
 		}

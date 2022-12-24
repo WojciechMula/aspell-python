@@ -9,7 +9,7 @@
 
         Released under BSD license
 
-        Wojciech Mu³a
+        Wojciech Muï¿½a
         wojciech_mula@poczta.onet.pl
 
  History:
@@ -59,13 +59,22 @@ static PyObject* AspellWordList2PythonList(const AspellWordList* wordlist) {
 	}
 
 	elements = aspell_word_list_elements(wordlist);
-	while ( (word=aspell_string_enumeration_next(elements)) != 0)
-		if (PyList_Append(list, Py_BuildValue("s", word)) == -1) {
+
+	while ( (word=aspell_string_enumeration_next(elements)) != 0) {
+	    // Memleak solved
+	    PyObject *py_word = Py_BuildValue("s", word);
+
+        int result = PyList_Append(list, py_word);
+        Py_DECREF(py_word);
+
+		if (result == -1) {
 			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
 			delete_aspell_string_enumeration(elements);
 			Py_DECREF(list);
 			return NULL;
 		}
+    }
+
 	delete_aspell_string_enumeration(elements);
 	return list;
 }
