@@ -27,7 +27,7 @@
               * new() constructor replaced with Speller()
               * constructor accepts now much simpler syntax for passing
                 multiple arguments
-              * removed methods releated to configuratinon from AspellSpeller
+              * removed methods related to configuratinon from AspellSpeller
                 object
               * global method ConfigKeys()
  #    29.01.2005:
@@ -61,7 +61,7 @@ static PyObject* AspellWordList2PythonList(const AspellWordList* wordlist) {
 	elements = aspell_word_list_elements(wordlist);
 	while ( (word=aspell_string_enumeration_next(elements)) != 0)
 		if (PyList_Append(list, Py_BuildValue("s", word)) == -1) {
-			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
+			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happened! Can't append element to the list.");
 			delete_aspell_string_enumeration(elements);
 			Py_DECREF(list);
 			return NULL;
@@ -85,7 +85,7 @@ static PyObject* AspellStringList2PythonList(const AspellStringList* wordlist) {
 	elements = aspell_string_list_elements(wordlist);
 	while ( (word=aspell_string_enumeration_next(elements)) != 0)
 		if (PyList_Append(list, Py_BuildValue("s", word)) == -1) {
-			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happend! Can't append element to the list.");
+			PyErr_SetString(PyExc_Exception, "It is almost impossible, but happened! Can't append element to the list.");
 			delete_aspell_string_enumeration(elements);
 			Py_DECREF(list);
 			return NULL;
@@ -152,7 +152,7 @@ static PyObject* new_speller(PyObject* self, PyObject* args) {
 		default: /* list of tuples key&value */
 			for (i=0; i<n; i++) {
 				if (!PyArg_ParseTuple(PyTuple_GetItem(args, i), "ss", &key, &value)) {
-					PyErr_Format(PyExc_TypeError, "argument %d: tuple of two strings (key, value) expeced", i);
+					PyErr_Format(PyExc_TypeError, "argument %d: tuple of two strings (key, value) expected", i);
 					goto arg_error;
 				}
 				if (!aspell_config_replace(config, key, value)) {
@@ -433,7 +433,7 @@ static PyObject* m_suggest(PyObject* self, PyObject* args) {
 	int   length;
 
 	if (!PyArg_ParseTuple(args, "s#", &word, &length)) {
-		PyErr_SetString(PyExc_TypeError, "string expeced");
+		PyErr_SetString(PyExc_TypeError, "string expected");
 		return NULL;
 	}
 
