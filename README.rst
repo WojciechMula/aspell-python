@@ -30,9 +30,9 @@ Version for Py2 has been tested with Python 2.1, Python 2.3.4
 and Python 2.4.1. Probably it works fine with all Python versions
 not older than 2.0. Version for Py3 has been tested with Python 3.2.
 
-__ http://docs.python.org/library/ctypes.html
 __ http://aspell.net
 __ http://code.activestate.com/recipes/117221/
+__ http://docs.python.org/library/ctypes.html
 
 
 License
