@@ -67,7 +67,7 @@ print "addtoSession method:"
 
 unknown_but_correct_words = ['linux', 'aspell', 'emacs', 'ocaml', 'python']
 
-print "aspell dosn't know any of these words:"
+print "aspell doesn't know any of these words:"
 pretty_print(unknown_but_correct_words)
 
 print "now, we add them to session dictionary"

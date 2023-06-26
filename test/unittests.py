@@ -68,7 +68,7 @@ class TestSuggestMethod(TestBase):
 
 class TestAddReplacementMethod(TestBase):
 	def test(self):
-		"addReplacement affects on order of words returing by suggest"
+		"addReplacement affects on order of words returning by suggest"
 
 		wrong		= 'wrod'
 		correct_def = 'word'	# first suggestion in default order
@@ -86,7 +86,7 @@ class TestAddReplacementMethod(TestBase):
 class TestaddtoSession(TestBase):
 	def test(self):
 		
-		# aspell dosn't know any of these words
+		# aspell doesn't know any of these words
 		for word in self.polish_words:
 			self.assertFalse(self.speller.check(word))
 

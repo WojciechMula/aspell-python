@@ -23,7 +23,7 @@ are two variants:
 * ``aspell-python`` --- C extension, two versions are available,
   one for Python 2.x, and Python 3.x.
 
-C exension exist in two versions: one compatible with Python 2.x
+C extension exists in two versions: one compatible with Python 2.x
 and other with Python 3.x. 
 
 Version for Py2 has been tested with Python 2.1, Python 2.3.4
@@ -95,7 +95,7 @@ Windows issues
 
 To correctly install aspell's dictionaries in Windows some additional
 work is needed. `Eric Woudenberg`__ has prepared detailed step-by-step
-instruction avaiable in file `windows.rst <windows.rst>`_.
+instructions available in file `windows.rst <windows.rst>`_.
 
 __ http://www.woudy.org/
 
